@@ -1,75 +1,94 @@
 {
-  "name": "safeapp-sam-ui",
-  "version": "0.0.0",
+  "name": "safe-apps",
   "private": true,
+  "scripts": {
+    "build": "yarn workspaces run build",
+    "test": "yarn workspaces run test --watchAll=false",
+    "test:coverage": "yarn workspaces run test --coverage --watchAll=false",
+    "deploy:pr": "yarn workspaces run deploy:pr",
+    "deploy:s3": "yarn workspaces run deploy:s3",
+    "format": "prettier --ignore-path .gitignore --write './apps/**/*.{js,jsx,ts,tsx}'",
+    "lint:check": "eslint './apps/**/*.{js,jsx,ts,tsx}'",
+    "lint:fix": "yarn lint:check --fix",
+    "start:drain-safe": "yarn workspace drain-safe start",
+    "start:ramp-network": "yarn workspace ramp-network start",
+    "start:siwe-delegate-manager": "yarn workspace siwe-delegate-manager start",
+    "start:tx-builder": "yarn workspace tx-builder start",
+    "start:wallet-connect": "yarn workspace wallet-connect start",
+    "start:mmi": "yarn workspace mmi start",
+    "prepare": "husky install",
+    "e2e": "npx cypress open"
+  },
+  "version": "2.5.1",
+  "workspaces": [
+    "apps/*"
+  ],
   "dependencies": {
-    "@gnosis.pm/safe-react-components": "1.1.5",
-    "@material-ui/core": "^4.12.4",
-    "@material-ui/icons": "^4.11.3",
-    "@material-ui/lab": "^4.0.0-alpha.60",
-    "@safe-global/safe-apps-provider": "^0.18.0",
     "@safe-global/safe-apps-react-sdk": "^4.7.0",
     "@safe-global/safe-apps-sdk": "^8.1.0",
-    "@safe-global/safe-deployments": "^1.26.0",
-    "axios": "^1.6.0",
-    "evm-proxy-detection": "1.0.0",
-    "localforage": "^1.10.0",
     "react": "^17.0.2",
-    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^17.0.2",
-    "react-hook-form": "7.39.1",
-    "react-router-dom": "^6.4.3",
     "react-scripts": "5.0.1",
-    "react-virtuoso": "^2.8.2",
-    "styled-components": "^5.3.6",
-    "web3": "~1.8.1"
+    "styled-components": "^5.3.6"
   },
   "devDependencies": {
-    "@hookform/devtools": "^4.2.3",
-    "@nomiclabs/hardhat-ethers": "^2.2.2",
-    "@nomiclabs/hardhat-etherscan": "^3.1.5",
+    "@jscutlery/semver": "^2.27.2",
+    "@nrwl/cli": "13.8.0",
+    "@nrwl/tao": "13.8.0",
+    "@nrwl/workspace": "13.8.0",
+    "@testing-library/cypress": "^9.0.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^12.1.4",
+    "@testing-library/react-hooks": "^8.0.1",
+    "@testing-library/user-event": "^14.4.3",
     "@types/jest": "^27.4.1",
-    "@types/react-beautiful-dnd": "^13.1.2",
+    "@types/node": "^17.0.29",
+    "@types/react": "^17.0.43",
+    "@types/react-dom": "^17.0.14",
     "@types/styled-components": "^5.1.26",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
     "assert": "^2.0.0",
+    "axios": "^1.6.0",
+    "buffer": "^6.0.3",
+    "commitizen": "^4.3.0",
     "crypto-browserify": "^3.12.0",
+    "cypress": "^12.4.0",
+    "cypress-file-upload": "^5.0.8",
+    "cz-conventional-changelog": "^3.3.0",
     "dotenv": "^16.0.3",
     "dotenv-cli": "^5.1.0",
-    "ethers": "^5.7.2",
-    "hardhat": "^2.12.6",
-    "hardhat-deploy": "^0.11.22",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-flowtype": "^8.0.3",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "git-cz": "^4.9.0",
     "https-browserify": "^1.0.0",
+    "husky": "~8.0.3",
+    "lint-staged": "^13.2.3",
     "os-browserify": "^0.3.0",
+    "prettier": "^3.0.0",
+    "process": "^0.11.10",
     "react-app-rewired": "^2.1.6",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.4",
+    "url": "^0.11.1"
   },
-  "scripts": {
-    "start": "dotenv -e .env -- react-app-rewired start",
-    "build": "dotenv -e .env -- react-app-rewired build",
-    "test": "react-app-rewired test",
-    "contract:deploy-all": "hardhat deploy-test-contracts --network",
-    "contract:read-method": "hardhat read-method",
-    "deploy:s3": "bash ../../scripts/deploy_to_s3_bucket.sh",
-    "deploy:pr": "bash ../../scripts/deploy_pr.sh",
-    "deploy:prod-hook": "bash ../../scripts/prepare_production_deployment.sh"
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+  "lint-staged": {
+    "./apps/**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --ignore-path .gitignore --write"
     ]
   }
 }
