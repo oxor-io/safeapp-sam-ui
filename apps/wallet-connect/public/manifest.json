@@ -1,0 +1,13 @@
+{
+  "name": "WalletConnect",
+  "description": "Allows your Safe to connect to dapps via WalletConnect.",
+  "iconPath": "wallet-connect.svg",
+  "icons": [
+    {
+      "src": "wallet-connect.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "safe_apps_permissions": ["camera"]
+}
