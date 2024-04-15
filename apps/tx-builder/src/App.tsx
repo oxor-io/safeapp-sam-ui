@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 
 import Header from './components/Header'
+import ModuleConfiguration from './pages/ModuleConfiguration'
 import CreateTransactions from './pages/CreateTransactions'
 import Dashboard from './pages/Dashboard'
 import EditTransactionLibrary from './pages/EditTransactionLibrary'
@@ -13,6 +14,7 @@ import {
   REVIEW_AND_CONFIRM_PATH,
   SAVE_BATCH_PATH,
   TRANSACTION_LIBRARY_PATH,
+  DASHBOARD_PATH,
 } from './routes/routes'
 
 const App = () => {
@@ -22,9 +24,10 @@ const App = () => {
       <Header />
 
       <Routes>
-        {/* Dashboard Screen (Create transactions) */}
-        <Route path={HOME_PATH} element={<Dashboard />}>
+        <Route path={HOME_PATH} element={<ModuleConfiguration />} />
 
+        {/* Dashboard Screen (Create transactions) */}
+        <Route path={DASHBOARD_PATH} element={<Dashboard />}>
           {/* Transactions Batch section */}
           <Route index element={<CreateTransactions />} />
 

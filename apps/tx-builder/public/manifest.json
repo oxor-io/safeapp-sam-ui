@@ -1,6 +1,6 @@
 {
-  "name": "Transaction Builder",
-  "description": "A Safe app to compose custom transactions",
+  "name": "SAM SafeAPP",
+  "description": "This is an implementation of the PoC contract for the Safe Wallet grant.",
   "iconPath": "tx-builder.png",
   "icons": [
     {
