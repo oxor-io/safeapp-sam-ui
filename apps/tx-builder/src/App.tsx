@@ -24,6 +24,7 @@ const App = () => {
       <Routes>
         {/* Dashboard Screen (Create transactions) */}
         <Route path={HOME_PATH} element={<Dashboard />}>
+
           {/* Transactions Batch section */}
           <Route index element={<CreateTransactions />} />
 

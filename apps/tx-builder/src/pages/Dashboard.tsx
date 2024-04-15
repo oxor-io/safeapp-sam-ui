@@ -14,11 +14,16 @@ import { ContractInterface } from '../typings/models'
 import { useNetwork } from '../store'
 import { useAbi } from '../hooks/useAbi'
 import { ImplementationABIDialog } from '../components/modals/ImplementationABIDialog'
+import singletonAbi from '../contracts/singletonAbi.json'
+import factoryAbi from '../contracts/factoryAbi.json'
+
 
 const Dashboard = (): ReactElement => {
   const [abiAddress, setAbiAddress] = useState('')
   const [transactionRecipientAddress, setTransactionRecipientAddress] = useState('')
   const [contract, setContract] = useState<ContractInterface | null>(null)
+  const [singleContract, setSingleContract] = useState<ContractInterface | null>(null)
+  const [factoryContract, setFactoryContract] = useState<ContractInterface | null>(null)
   const [showHexEncodedData, setShowHexEncodedData] = useState<boolean>(false)
   const { abi, abiStatus, setAbi } = useAbi(abiAddress)
   const [implementationABIDialog, setImplementationABIDialog] = useState({
@@ -38,6 +43,27 @@ const Dashboard = (): ReactElement => {
     setContract(interfaceRepo.getMethods(abi))
   }, [abi, interfaceRepo])
 
+  useEffect(() => {
+    if (!singletonAbi || !interfaceRepo) {
+      setSingleContract(null)
+      return
+    }
+
+    setSingleContract(interfaceRepo.getMethods(JSON.stringify(singletonAbi)))
+  }, [interfaceRepo])
+
+  useEffect(() => {
+    if (!factoryAbi || !interfaceRepo) {
+      setFactoryContract(null)
+      return
+    }
+
+    setFactoryContract(interfaceRepo.getMethods(JSON.stringify(factoryAbi)))
+  }, [interfaceRepo])
+
+
+  console.log({singleContract, factoryAbi})
+
   const isAbiAddressInputFieldValid = !abiAddress || isValidAddress(abiAddress)
 
   const contractHasMethods =
@@ -52,12 +78,15 @@ const Dashboard = (): ReactElement => {
 
   const showNoPublicMethodsWarning = contract && contract.methods.length === 0
 
-  // The flow is the following:
-  // 1. We receive the address input and check if it's a valid address
-  // 2. If it's a valid address, we get the implementation address and check if there's an ABI for it
-  // 3. If there's an ABI for the implementation address, we show the ABI dialog
-  // 4. If the user chooses to use the implementation address, we set the ABI address to the
-  //    implementation address, otherwise we keep the original address.
+
+  // @ts-ignore
+/*
+  factoryContract?.methods.getChainId().send({from: '0x9b1a98Db4b39D1239e69d5705099af29B1d46AC8'})
+      .on('receipt', function(){
+      console.log('3333')
+      });
+*/
+
   const handleAbiAddressInput = useCallback(
     async (input: string) => {
       // For some reason the onchange handler is fired many times
@@ -73,6 +102,7 @@ const Dashboard = (): ReactElement => {
           // @ts-expect-error currentProvider type is many providers and not all of them are compatible
           // with EIP-1193, but the one we use is compatible (safe-apps-provider)
           web3.currentProvider.request.bind(web3.currentProvider),
+
         )
 
         if (implementationAddress) {
