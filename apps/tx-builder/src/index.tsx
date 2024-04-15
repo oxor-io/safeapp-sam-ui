@@ -16,7 +16,7 @@ ReactDOM.render(
     <ThemeProvider theme={theme}>
       <SafeProvider>
         <StoreProvider>
-          <BrowserRouter basename={process.env.PUBLIC_URL}>
+          <BrowserRouter>
             <App />
           </BrowserRouter>
         </StoreProvider>

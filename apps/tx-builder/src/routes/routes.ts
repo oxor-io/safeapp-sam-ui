@@ -1,7 +1,8 @@
 export const HOME_PATH = '/'
 
-export const CREATE_BATCH_PATH = HOME_PATH
-export const BATCH_PATH = '/batch'
+export const DASHBOARD_PATH = '/dashboard'
+export const CREATE_BATCH_PATH = `${DASHBOARD_PATH}/create-batch`
+export const BATCH_PATH = `${DASHBOARD_PATH}/batch`
 export const SAVE_BATCH_PATH = BATCH_PATH
 export const EDIT_BATCH_PATH = `${BATCH_PATH}/:batchId`
 
