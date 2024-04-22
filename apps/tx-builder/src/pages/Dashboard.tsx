@@ -14,16 +14,12 @@ import { ContractInterface } from '../typings/models'
 import { useNetwork } from '../store'
 import { useAbi } from '../hooks/useAbi'
 import { ImplementationABIDialog } from '../components/modals/ImplementationABIDialog'
-import singletonAbi from '../contracts/singletonAbi.json'
-import factoryAbi from '../contracts/factoryAbi.json'
-
+import ZkProofWindow from '../components/ZkProofWindow'
 
 const Dashboard = (): ReactElement => {
   const [abiAddress, setAbiAddress] = useState('')
   const [transactionRecipientAddress, setTransactionRecipientAddress] = useState('')
   const [contract, setContract] = useState<ContractInterface | null>(null)
-  const [singleContract, setSingleContract] = useState<ContractInterface | null>(null)
-  const [factoryContract, setFactoryContract] = useState<ContractInterface | null>(null)
   const [showHexEncodedData, setShowHexEncodedData] = useState<boolean>(false)
   const { abi, abiStatus, setAbi } = useAbi(abiAddress)
   const [implementationABIDialog, setImplementationABIDialog] = useState({
@@ -32,7 +28,13 @@ const Dashboard = (): ReactElement => {
     proxyAddress: '',
   })
 
-  const { interfaceRepo, networkPrefix, getAddressFromDomain, web3, chainInfo } = useNetwork()
+  const {
+    interfaceRepo,
+    networkPrefix,
+    getAddressFromDomain,
+    web3,
+    chainInfo,
+  } = useNetwork()
 
   useEffect(() => {
     if (!abi || !interfaceRepo) {
@@ -42,27 +44,6 @@ const Dashboard = (): ReactElement => {
 
     setContract(interfaceRepo.getMethods(abi))
   }, [abi, interfaceRepo])
-
-  useEffect(() => {
-    if (!singletonAbi || !interfaceRepo) {
-      setSingleContract(null)
-      return
-    }
-
-    setSingleContract(interfaceRepo.getMethods(JSON.stringify(singletonAbi)))
-  }, [interfaceRepo])
-
-  useEffect(() => {
-    if (!factoryAbi || !interfaceRepo) {
-      setFactoryContract(null)
-      return
-    }
-
-    setFactoryContract(interfaceRepo.getMethods(JSON.stringify(factoryAbi)))
-  }, [interfaceRepo])
-
-
-  console.log({singleContract, factoryAbi})
 
   const isAbiAddressInputFieldValid = !abiAddress || isValidAddress(abiAddress)
 
@@ -77,15 +58,6 @@ const Dashboard = (): ReactElement => {
   const showNewTransactionForm = isTransferTransaction || isContractInteractionTransaction
 
   const showNoPublicMethodsWarning = contract && contract.methods.length === 0
-
-
-  // @ts-ignore
-/*
-  factoryContract?.methods.getChainId().send({from: '0x9b1a98Db4b39D1239e69d5705099af29B1d46AC8'})
-      .on('receipt', function(){
-      console.log('3333')
-      });
-*/
 
   const handleAbiAddressInput = useCallback(
     async (input: string) => {
@@ -102,7 +74,6 @@ const Dashboard = (): ReactElement => {
           // @ts-expect-error currentProvider type is many providers and not all of them are compatible
           // with EIP-1193, but the one we use is compatible (safe-apps-provider)
           web3.currentProvider.request.bind(web3.currentProvider),
-
         )
 
         if (implementationAddress) {
@@ -131,7 +102,7 @@ const Dashboard = (): ReactElement => {
 
   return (
     <Wrapper>
-      <Grid alignItems="flex-start" container justifyContent="center" spacing={6}>
+      <Grid alignItems="flex-start" container justifyContent="space-between" spacing={6}>
         <AddNewTransactionFormWrapper item xs={12} md={6}>
           <Grid container alignItems="center">
             <Grid item xs={6}>
@@ -205,6 +176,8 @@ const Dashboard = (): ReactElement => {
         </AddNewTransactionFormWrapper>
 
         <Outlet />
+
+        <ZkProofWindow />
       </Grid>
 
       {implementationABIDialog.open && (
