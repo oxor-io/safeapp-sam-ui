@@ -1,6 +1,14 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { Button, Text, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
+import { useNetwork } from '../store'
+
+import { AbiItem } from 'web3-utils'
+import { Contract } from 'web3-eth-contract'
+
+import safeProxyFactory from '../contracts/SafeProxyFactory.json'
+import safeAnonymizationModule from '../contracts/SafeAnonymizationModule.json'
+import { TextFieldInput } from '@gnosis.pm/safe-react-components'
 
 const ModuleConfiguration: FC = () => {
   const [module, setModule] = useState(false)
@@ -8,7 +16,49 @@ const ModuleConfiguration: FC = () => {
 
   const [listOfOwners, setListOfOwners] = useState('')
 
-  const onModuleCreate = () => {
+  const [safeProxyFactoryContract, setSafeProxyFactoryContract] = useState<Contract | null>(null)
+  const [safeAnonymizationModuleContract, setSafeAnonymizationModuleContract] = useState<Contract | null>(null)
+
+  const {
+    interfaceRepo,
+    web3,
+    chainInfo,
+    safe,
+    sdk,
+  } = useNetwork()
+
+  useEffect(() => {
+    if (!web3) {
+      return
+    }
+
+    const proxyFactoryContract = new web3.eth.Contract(safeProxyFactory.abi as AbiItem[], safeProxyFactory.address)
+    setSafeProxyFactoryContract(proxyFactoryContract)
+
+    const samContract = new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], safeAnonymizationModule.address)
+    setSafeAnonymizationModuleContract(samContract)
+  }, [web3])
+
+  useEffect(() => {
+    setListOfOwners(safe.owners.toString())
+  }, []);
+
+
+  const onModuleCreate = async () => {
+    if (!safeAnonymizationModuleContract) {
+      return
+    }
+
+    // sdk.txs.send({
+    //   txs: [
+    //     {
+    //       value: '0',
+    //       to: safeProxyFactory.address,
+    //       data: safeAnonymizationModuleContract.methods["setup"](safe.safeAddress, defaultRoot, 1).encodeABI(),
+    //     },
+    //   ],
+    // })
+
     console.log("module created!")
     //   TODO
     setModule(true)
@@ -31,27 +81,40 @@ const ModuleConfiguration: FC = () => {
   return (
     <Wrapper>
       <StyledTitle size="lg">
-        {/* TODO: set dynamic title */}
-        Create ZK Wallet
+        {!module ? 'Create ' : 'Edit '}
+        ZK Wallet
       </StyledTitle>
 
       <WalletAddressText size="lg">
-        Safe ZK Wallet address: "Address"
+        Safe ZK Wallet address:
+        {' '}
+        {safe.safeAddress}
       </WalletAddressText>
 
-      <Text size="md">
-        List of owners
-      </Text>
+      <StyledTextFieldInput
+        name="list-of-owners"
+        label="List of owners"
+        fullWidth
+        minRows={7}
+        value={listOfOwners}
+        variant="filled"
+        onChange={(event) => setListOfOwners(event.target.value)}
+        multiline
+      />
 
-      <ListOfOwners>
-        {listOfOwners}
-      </ListOfOwners>
+      {module && (
+        <TextFieldInput
+          name="threshold"
+          label="Threshold"
+          value={safe.threshold}
+        />
+      )}
 
       <ButtonContainer>
         {!module ? (
           <Button
             onClick={onModuleCreate}
-            size="md"
+            size="lg"
             color="primary"
           >
             Create Module
@@ -112,10 +175,8 @@ const WalletAddressText = styled(Text)`
   margin-bottom: 2em;
 `
 
-const ListOfOwners = styled.div`
-  border: 1px solid #000000;
-  background-color: #696969;
-  min-height: 250px;
+const StyledTextFieldInput = styled(TextFieldInput)`
+  margin-bottom: 2em;
 `
 
 const ButtonContainer = styled.div`

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   Button,
   ButtonLink,
@@ -11,12 +11,10 @@ import {
   Text,
 } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
-import { useNavigate } from 'react-router-dom'
 
 import DeleteBatchModal from '../components/modals/DeleteBatchModal'
 import TransactionsBatchList from '../components/TransactionsBatchList'
 import useModal from '../hooks/useModal/useModal'
-import { HOME_PATH } from '../routes/routes'
 import SuccessBatchCreationModal from '../components/modals/SuccessBatchCreationModal'
 import { useTransactionLibrary, useTransactions } from '../store'
 import { useSimulation } from '../hooks/useSimulation'
@@ -50,7 +48,6 @@ const ReviewAndConfirm = () => {
     simulationLink,
     simulationSupported,
   } = useSimulation()
-  const navigate = useNavigate()
 
   const clickSimulate = () => {
     simulateTransaction()
@@ -68,30 +65,24 @@ const ReviewAndConfirm = () => {
     }
   }
 
-  useEffect(() => {
-    const hasTransactions = transactions.length > 0
-
-    if (!hasTransactions) {
-      navigate(HOME_PATH)
-    }
-  }, [transactions, navigate])
-
   return (
     <>
       <Wrapper>
         <StyledTitle size="xl">Review and Confirm</StyledTitle>
 
-        <TransactionsBatchList
-          batchTitle={'Transactions Batch'}
-          transactions={transactions}
-          removeTransaction={removeTransaction}
-          saveBatch={saveBatch}
-          downloadBatch={downloadBatch}
-          reorderTransactions={reorderTransactions}
-          replaceTransaction={replaceTransaction}
-          showTransactionDetails
-          showBatchHeader
-        />
+        { transactions.length > 0 && (
+          <TransactionsBatchList
+            batchTitle={'Transactions Batch'}
+            transactions={transactions}
+            removeTransaction={removeTransaction}
+            saveBatch={saveBatch}
+            downloadBatch={downloadBatch}
+            reorderTransactions={reorderTransactions}
+            replaceTransaction={replaceTransaction}
+            showTransactionDetails
+            showBatchHeader
+          />
+        )}
 
         <ButtonsWrapper>
           {/* Send batch button */}
@@ -126,6 +117,7 @@ const ReviewAndConfirm = () => {
               type="button"
               variant="contained"
               color="secondary"
+              disabled={!transactions.length}
               onClick={clickSimulate}
             >
               Simulate

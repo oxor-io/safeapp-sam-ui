@@ -1,3 +1,4 @@
+import React from 'react'
 import ReactDOM from 'react-dom'
 import { ThemeProvider } from 'styled-components'
 import { theme } from '@gnosis.pm/safe-react-components'
@@ -6,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import * as serviceWorker from './serviceWorker'
 
+import AppLoader from './components/AppLoader'
 import GlobalStyles from './global'
 import App from './App'
 import StoreProvider from './store'
@@ -14,7 +16,7 @@ ReactDOM.render(
   <>
     <GlobalStyles />
     <ThemeProvider theme={theme}>
-      <SafeProvider>
+      <SafeProvider loader={<AppLoader />}>
         <StoreProvider>
           <BrowserRouter>
             <App />
