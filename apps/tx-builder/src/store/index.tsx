@@ -1,14 +1,19 @@
+import React from 'react'
 import TransactionsProvider from './transactionsContext'
 import TransactionLibraryProvider from './transactionLibraryContext'
-import React from 'react'
 import NetworkProvider from './networkContext'
+import SamProvider from './samContext'
 
 const StoreProvider: React.FC = ({ children }) => {
   return (
     <NetworkProvider>
-      <TransactionsProvider>
-        <TransactionLibraryProvider>{children}</TransactionLibraryProvider>
-      </TransactionsProvider>
+      <SamProvider>
+        <TransactionsProvider>
+          <TransactionLibraryProvider>
+            {children}
+          </TransactionLibraryProvider>
+        </TransactionsProvider>
+      </SamProvider>
     </NetworkProvider>
   )
 }
