@@ -1,23 +1,13 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, useState } from 'react'
 import { Button, Text, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
 import { useNetwork } from '../store'
 
-import { AbiItem } from 'web3-utils'
-import { Contract } from 'web3-eth-contract'
-
-import safeProxyFactory from '../contracts/SafeProxyFactory.json'
-import safeAnonymizationModule from '../contracts/SafeAnonymizationModule.json'
 import { TextFieldInput } from '@gnosis.pm/safe-react-components'
+import { useSam } from '../store/samContext'
 
 const ModuleConfiguration: FC = () => {
   const [module, setModule] = useState(false)
-  const [moduleEnabled, setModuleEnabled] = useState(false)
-
-  const [listOfOwners, setListOfOwners] = useState('')
-
-  const [safeProxyFactoryContract, setSafeProxyFactoryContract] = useState<Contract | null>(null)
-  const [safeAnonymizationModuleContract, setSafeAnonymizationModuleContract] = useState<Contract | null>(null)
 
   const {
     interfaceRepo,
@@ -27,37 +17,17 @@ const ModuleConfiguration: FC = () => {
     sdk,
   } = useNetwork()
 
-  useEffect(() => {
-    if (!web3) {
-      return
-    }
-
-    const proxyFactoryContract = new web3.eth.Contract(safeProxyFactory.abi as AbiItem[], safeProxyFactory.address)
-    setSafeProxyFactoryContract(proxyFactoryContract)
-
-    const samContract = new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], safeAnonymizationModule.address)
-    setSafeAnonymizationModuleContract(samContract)
-  }, [web3])
-
-  useEffect(() => {
-    setListOfOwners(safe.owners.toString())
-  }, []);
+  const {
+    zkWalletAddress,
+    listOfOwners,
+    moduleEnabled,
+    createModule,
+    enableModule,
+  } = useSam()
 
 
   const onModuleCreate = async () => {
-    if (!safeAnonymizationModuleContract) {
-      return
-    }
-
-    // sdk.txs.send({
-    //   txs: [
-    //     {
-    //       value: '0',
-    //       to: safeProxyFactory.address,
-    //       data: safeAnonymizationModuleContract.methods["setup"](safe.safeAddress, defaultRoot, 1).encodeABI(),
-    //     },
-    //   ],
-    // })
+    createModule()
 
     console.log("module created!")
     //   TODO
@@ -65,8 +35,7 @@ const ModuleConfiguration: FC = () => {
   }
 
   const onModuleEnable = () => {
-    setModuleEnabled(true)
-    // TODO
+    enableModule()
   }
 
   const onModuleUpdate = () => {
@@ -74,7 +43,6 @@ const ModuleConfiguration: FC = () => {
   }
 
   const onModuleDisable = () => {
-    setModuleEnabled(false)
     // TODO
   }
 
@@ -85,26 +53,29 @@ const ModuleConfiguration: FC = () => {
         ZK Wallet
       </StyledTitle>
 
-      <WalletAddressText size="lg">
-        Safe ZK Wallet address:
-        {' '}
-        {safe.safeAddress}
-      </WalletAddressText>
+      {zkWalletAddress && (
+        <WalletAddressText size="lg">
+          Safe ZK Wallet address:
+          {' '}
+          {zkWalletAddress}
+        </WalletAddressText>
+      )}
 
       <StyledTextFieldInput
         name="list-of-owners"
         label="List of owners"
         fullWidth
+        multiline
         minRows={7}
         value={listOfOwners}
         variant="filled"
-        onChange={(event) => setListOfOwners(event.target.value)}
-        multiline
+        // onChange={(event) => setListOfOwners(event.target.value)}
       />
 
       {module && (
         <TextFieldInput
           name="threshold"
+          type="number"
           label="Threshold"
           value={safe.threshold}
         />

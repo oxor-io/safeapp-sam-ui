@@ -4,43 +4,63 @@ import styled from 'styled-components'
 
 import {
   DASHBOARD_PATH,
-  HOME_PATH, REVIEW_AND_CONFIRM_PATH, TRANSACTION_LIBRARY_PATH,
+  HOME_PATH,
+  REVIEW_AND_CONFIRM_PATH,
+  TRANSACTION_LIBRARY_PATH,
 } from '../routes/routes'
+import { useSam } from '../store/samContext'
 import ChecksumWarning from './ChecksumWarning'
 import ErrorAlert from './ErrorAlert'
 
 const Header = () => {
+  const { root, threshold, moduleEnabled } = useSam()
+
   return (
     <>
       <HeaderWrapper>
-        <StyledLink to={HOME_PATH}>
-          <Text size="xl">
-            ZK Wallet
-          </Text>
-        </StyledLink>
+        <StyledNav>
+          <StyledLink to={HOME_PATH}>
+            <Text size="xl">
+              ZK Wallet
+            </Text>
+          </StyledLink>
 
-        {/*<StyledLink to={DASHBOARD_PATH}>*/}
-        {/*  <Text size="xl">*/}
-        {/*    TX Builder dashboard*/}
-        {/*  </Text>*/}
-        {/*</StyledLink>*/}
+          { moduleEnabled && (
+            <>
+              <StyledLink to={DASHBOARD_PATH}>
+                <Text size="xl">
+                  New
+                </Text>
+              </StyledLink>
+              <StyledLink to={REVIEW_AND_CONFIRM_PATH}>
+                <Text size="xl">
+                  Pending
+                </Text>
+              </StyledLink>
+              <StyledLink to={TRANSACTION_LIBRARY_PATH}>
+                <Text size="xl">
+                  Confirmed
+                </Text>
+              </StyledLink>
+            </>
+          ) }
+        </StyledNav>
 
+        { (threshold && root) && (
+          <StyledDiv>
+            <Text size="sm">
+              Root:
+              {' '}
+              '7378323513472991738372527896654445137493089583233093119951646841738120031371
+            </Text>
 
-        <StyledLink to={DASHBOARD_PATH}>
-          <Text size="sm">
-            New
-          </Text>
-        </StyledLink>
-        <StyledLink to={REVIEW_AND_CONFIRM_PATH}>
-          <Text size="sm">
-            Pending
-          </Text>
-        </StyledLink>
-        <StyledLink to={TRANSACTION_LIBRARY_PATH}>
-          <Text size="sm">
-            Confirmed
-          </Text>
-        </StyledLink>
+            <Text size="sm">
+              Threshold:
+              {' '}
+              {threshold}
+            </Text>
+          </StyledDiv>
+        )}
       </HeaderWrapper>
       <ErrorAlert />
       <ChecksumWarning />
@@ -55,6 +75,7 @@ const HeaderWrapper = styled.header`
   width: 100%;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   border-bottom: 1px solid #e2e3e3;
   z-index: 10;
   background-color: white;
@@ -64,9 +85,31 @@ const HeaderWrapper = styled.header`
   gap: 40px;
 `
 
+const StyledNav = styled.nav`
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+`
+
+const StyledDiv = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+
+  & p {
+    display: inline;
+  }
+`
+
 const StyledLink = styled(Link)`
   display: flex;
   align-items: center;
   font-size: 16px;
   text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `
