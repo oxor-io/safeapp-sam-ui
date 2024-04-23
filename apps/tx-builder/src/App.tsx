@@ -16,12 +16,42 @@ import {
   TRANSACTION_LIBRARY_PATH,
   DASHBOARD_PATH,
 } from './routes/routes'
+import {Type} from "hardhat/internal/hardhat-network/provider/filter";
 
 const App = () => {
+  const testConnectToBackend = async () => {
+    //const data = { address_to: '0x', value: '1111', memory_data: {data: 'memory data'}, proofs: [{data: 'proof 1'}, {data: 'proof 2'}, {data: 'proof 3'}], operation: {data: 'operation data'} }
+
+   /* return await fetch(`${process.env.REACT_APP_SUPABASE_URL}/rest/v1/transactions`, {
+      method: 'POST',
+      headers: {
+        "Content-Type": 'application/json',
+        "apiKey": process.env.REACT_APP_SUPABASE_KEY ?? '',
+        Authorization: `Bearer ${process.env.REACT_APP_SUPABASE_KEY ?? ''}`,
+      },
+      body: JSON.stringify(data),
+    })*/
+
+    const res =  await fetch(`${process.env.REACT_APP_SUPABASE_URL}/rest/v1/transactions`, {
+      method: 'GET',
+      headers: {
+        "Content-Type": 'application/json',
+        "apiKey": process.env.REACT_APP_SUPABASE_KEY ?? '',
+        Authorization: `Bearer ${process.env.REACT_APP_SUPABASE_KEY ?? ''}`,
+      },
+    })
+
+    console.log(await res.json())
+
+    return res
+
+  }
   return (
     <>
       {/* App Header */}
       <Header />
+
+      <div onClick={()=>testConnectToBackend()}>use Back</div>
 
       <Routes>
         <Route path={HOME_PATH} element={<ModuleConfiguration />} />
