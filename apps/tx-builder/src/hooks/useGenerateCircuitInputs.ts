@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { Element } from 'fixed-merkle-tree'
 
 export interface GeneratorParameters {
@@ -18,17 +17,16 @@ export interface WitnessData {
   s: string
 }
 
-const useGenerateCircuitInputs = (params: GeneratorParameters) => {
-  const [inputs, setInputs] = useState<WitnessData | null>(null)
-
-  useEffect(() => {
+export const useGenerateCircuitInputs = () => {
+  const generateInputs = async (params: GeneratorParameters): Promise<WitnessData> => {
     // TODO: Provide generateDataCircom function from
     // const generatedInputs = ...
 
-    // setInputs(generatedInputs)
-  }, [params]);
+    // return generatedInputs
 
-  return { inputs }
+    // TODO: remove it, when upper TODO will be resolved
+    return null as any
+  }
+
+  return { generateInputs }
 }
-
-export default useGenerateCircuitInputs

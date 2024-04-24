@@ -10,14 +10,16 @@ import { evalTemplate, FETCH_STATUS, isValidAddress } from '../utils'
 import AddNewTransactionForm from '../components/forms/AddNewTransactionForm'
 import JsonField from '../components/forms/fields/JsonField'
 import { ContractInterface } from '../typings/models'
-import { useNetwork, useTransactions } from '../store'
+import { useNetwork } from '../store'
 import { useAbi } from '../hooks/useAbi'
 import { useCircomProof } from '../hooks/useCircomProof'
 import { useDbInteraction } from '../hooks/useDbInteraction'
+import { useGenerateCircuitInputs } from '../hooks/useGenerateCircuitInputs'
 import { ImplementationABIDialog } from '../components/modals/ImplementationABIDialog'
 import ZkProofWindow from '../components/ZkProofWindow'
 import { parseFormToProposedTransaction, SolidityFormValuesTypes } from '../components/forms/SolidityForm'
 import { useNavigate } from 'react-router-dom'
+import { ProposedTransaction } from '../typings/models'
 import { REVIEW_AND_CONFIRM_PATH } from '../routes/routes'
 
 const Dashboard = (): ReactElement => {
@@ -25,6 +27,7 @@ const Dashboard = (): ReactElement => {
   const [transactionRecipientAddress, setTransactionRecipientAddress] = useState('')
   const [contract, setContract] = useState<ContractInterface | null>(null)
   const [showHexEncodedData, setShowHexEncodedData] = useState<boolean>(false)
+  const [proposedTransaction, setProposedTransaction] = useState<ProposedTransaction | null>()
   const { abi, abiStatus, setAbi } = useAbi(abiAddress)
   const [implementationABIDialog, setImplementationABIDialog] = useState({
     open: false,
@@ -40,14 +43,11 @@ const Dashboard = (): ReactElement => {
     chainInfo,
     nativeCurrencySymbol,
   } = useNetwork()
-
-  const { addTransaction } = useTransactions()
-
   const navigate = useNavigate()
 
   const { saveTransaction } = useDbInteraction()
-
-  const {} = useCircomProof()
+  const { generateInputs } = useGenerateCircuitInputs()
+  const { proof, generateCircomProof } = useCircomProof()
 
   useEffect(() => {
     if (!abi || !interfaceRepo) {
@@ -109,19 +109,24 @@ const Dashboard = (): ReactElement => {
     [abiAddress, interfaceRepo, web3],
   )
 
-  const onGenerateProof = (values: SolidityFormValuesTypes) => {
-    const proposedTransaction = parseFormToProposedTransaction(
+  const onGenerateProof = async (values: SolidityFormValuesTypes) => {
+    const newProposedTransaction = parseFormToProposedTransaction(
       values,
       contract,
       nativeCurrencySymbol,
       networkPrefix,
     )
 
-    saveTransaction(proposedTransaction)
-    // addTransaction(proposedTransaction)
+    setProposedTransaction(newProposedTransaction)
+
+    // TODO
+    // const circomData = generateInputs()
+    // await generateCircomProof(circomData)
   }
 
   const onSaveTransaction = () => {
+    // saveTransaction()
+
     navigate(REVIEW_AND_CONFIRM_PATH)
   }
 
@@ -206,7 +211,7 @@ const Dashboard = (): ReactElement => {
         </AddNewTransactionFormWrapper>
 
         <ZkProofWindow
-          proof=""
+          proof={proof}
           onSaveTransaction={onSaveTransaction}
         />
       </Grid>

@@ -25,7 +25,7 @@ const Header = () => {
             </Text>
           </StyledLink>
 
-          { moduleEnabled && (
+          { !moduleEnabled && (
             <>
               <StyledLink to={DASHBOARD_PATH}>
                 <Text size="xl">
