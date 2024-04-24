@@ -10,11 +10,13 @@ import safeModule from '../contracts/Safe.json'
 type SamContextProps = {
   zkWalletAddress: string | null
   listOfOwners: string
-  threshold: number | null
+  threshold: number
   root: string| null
   moduleEnabled: boolean
   createModule: () => void
   enableModule: () => void
+  changeListOfOwners: (newValue: string) => void
+  changeThreshold: (newValue: number) => void
 }
 
 export const SamContext = createContext<SamContextProps | null>(null)
@@ -27,7 +29,7 @@ const SamProvider: FC = ({ children }) => {
   const [listOfOwners, setListOfOwners] = useState('')
   const [zkWalletAddress, setZkWalletAddress] = useState<string | null>(null)
   const [root, setRoot] = useState<string | null>(null)
-  const [threshold, setThreshold] = useState<number | null>(null)
+  const [threshold, setThreshold] = useState<number>(1)
   const [moduleEnabled, setModuleEnabled] = useState<boolean>(false)
 
   const { sdk, web3, safe } = useNetwork()
@@ -54,7 +56,7 @@ const SamProvider: FC = ({ children }) => {
     }
 
     // TODO: provide real root
-    const testRoot = '7378323513472991738372527896654445137493089583233093119951646841738120031371'
+    const testRoot = '7378323513472994738372527896654446137493089583233093119951646841738120031371'
     const testSalt = toBN('7777').toString()
     const threshold = toBN(1).toString()
 
@@ -76,6 +78,8 @@ const SamProvider: FC = ({ children }) => {
         safeTxGas: 500000,
       }
     })
+
+    console.log(createSamTx.safeTxHash)
 
     // TODO: Get address from previous transaction and set it to state
     // setZkWalletAddress()
@@ -102,7 +106,20 @@ const SamProvider: FC = ({ children }) => {
     })
   }
 
-  const changeParameters = (what: 'root' | 'threshold', newValue: string | number) => {
+  const changeListOfOwners = async (newValue: string) => {
+    // TODO:
+    // const newRoot = generateRoot()
+
+    // await changeParameters('root', newRoot)
+    // setListOfOwners(newValue)
+    // setRoot(newRoot)
+  }
+
+  const changeThreshold = async (newValue: number) => {
+    await changeParameters("threshold", newValue)
+  }
+
+  const changeParameters = async (what: 'root' | 'threshold', newValue: string | number) => {
     if (!samContract) {
       return
     }
@@ -116,7 +133,7 @@ const SamProvider: FC = ({ children }) => {
     ).encodeABI()
 
     // TODO: set up sending fileData to the SAM contract correctly
-    // sdk.txs.send()
+    // await sdk.txs.send()
   }
 
   return (
@@ -129,6 +146,8 @@ const SamProvider: FC = ({ children }) => {
         moduleEnabled,
         createModule,
         enableModule,
+        changeListOfOwners,
+        changeThreshold,
       }}
     >
       {children}

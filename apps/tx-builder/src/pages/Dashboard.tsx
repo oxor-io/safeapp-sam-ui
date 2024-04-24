@@ -13,6 +13,7 @@ import { ContractInterface } from '../typings/models'
 import { useNetwork, useTransactions } from '../store'
 import { useAbi } from '../hooks/useAbi'
 import { useCircomProof } from '../hooks/useCircomProof'
+import { useDbInteraction } from '../hooks/useDbInteraction'
 import { ImplementationABIDialog } from '../components/modals/ImplementationABIDialog'
 import ZkProofWindow from '../components/ZkProofWindow'
 import { parseFormToProposedTransaction, SolidityFormValuesTypes } from '../components/forms/SolidityForm'
@@ -43,6 +44,8 @@ const Dashboard = (): ReactElement => {
   const { addTransaction } = useTransactions()
 
   const navigate = useNavigate()
+
+  const { saveTransaction } = useDbInteraction()
 
   const {} = useCircomProof()
 
@@ -114,7 +117,8 @@ const Dashboard = (): ReactElement => {
       networkPrefix,
     )
 
-    addTransaction(proposedTransaction)
+    saveTransaction(proposedTransaction)
+    // addTransaction(proposedTransaction)
   }
 
   const onSaveTransaction = () => {

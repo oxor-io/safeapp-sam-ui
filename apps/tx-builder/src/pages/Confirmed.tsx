@@ -3,38 +3,30 @@ import {
   Title,
 } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
+import TransactionsBatchList from '../components/TransactionsBatchList'
 
-import { useTransactions } from '../store'
-import useDBInteraction from '../hooks/useDBInteraction'
+import { useDbInteraction } from '../hooks/useDbInteraction'
 
 const Confirmed = () => {
-  const { transactions, isLoading} = useDBInteraction()
+  const { transactions, isLoading} = useDbInteraction()
+  const confirmedTransactions = transactions.filter((transaction) => transaction.confirmed)
 
   return (
-    <>
-      <Wrapper>
-        <StyledTitle size="xl">Confirmed transactions</StyledTitle>
+    <Wrapper>
+      <StyledTitle size="xl">Confirmed transactions</StyledTitle>
 
-        { !isLoading ? (
-          <></>
-          //   { transactions.length > 0 && (
-          //     <TransactionsBatchList
-          //       batchTitle={'Transactions Batch'}
-          //       transactions={transactions}
-          //       removeTransaction={removeTransaction}
-          //       saveBatch={saveBatch}
-          //       downloadBatch={downloadBatch}
-          //       reorderTransactions={reorderTransactions}
-          //       replaceTransaction={replaceTransaction}
-          //       showTransactionDetails
-          //       showBatchHeader
-          //     />
-          //   )}
+      { !isLoading ?
+        confirmedTransactions.length > 0 && (
+          <TransactionsBatchList
+            batchTitle={'Transactions Batch'}
+            transactions={confirmedTransactions}
+            showTransactionDetails
+            showBatchHeader
+          />
         ) : (
-          <Loader size="lg" />
-        )}
-      </Wrapper>
-    </>
+        <Loader size="lg" color="secondary" />
+      )}
+    </Wrapper>
   )
 }
 

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 
-import { ProposedTransaction } from '../typings/models'
+import { ProposedTransaction, SamTransaction } from '../typings/models'
 
 const REACT_APP_SUPABASE_URL = "https://snsoupmxxcbdyohaeeny.supabase.co"
 const REACT_APP_SUPABASE_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuc291cG14eGNiZHlvaGFlZW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTM4OTM2MzEsImV4cCI6MjAyOTQ2OTYzMX0.v8BGP1LFm1siAYXC7QYobH9bJ0y-tnzVMCqJkhOF4Eg"
 
-const useDBInteraction = () => {
+export const useDbInteraction = () => {
   const [isLoading, setIsLoading] = useState(false)
-  const [transactions, setTransactions] = useState()
+  const [transactions, setTransactions] = useState<SamTransaction[]>([])
 
   useEffect(() => {
     fetchTransactions()
@@ -43,7 +43,7 @@ const useDBInteraction = () => {
         Authorization: `Bearer ${REACT_APP_SUPABASE_KEY ?? ''}`,
       },
       body: JSON.stringify(transaction),
-      })
+    })
   }
 
   return {
@@ -52,5 +52,3 @@ const useDBInteraction = () => {
     saveTransaction,
   }
 }
-
-export default useDBInteraction

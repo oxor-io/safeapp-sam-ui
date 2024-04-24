@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import {
-  Button,
   ButtonLink,
   Card,
-  FixedIcon,
   IconText,
   Link,
   Title,
@@ -19,6 +17,7 @@ import SuccessBatchCreationModal from '../components/modals/SuccessBatchCreation
 import { useTransactionLibrary, useTransactions } from '../store'
 import { useSimulation } from '../hooks/useSimulation'
 import { FETCH_STATUS } from '../utils'
+import { useDbInteraction } from '../hooks/useDbInteraction'
 
 const ReviewAndConfirm = () => {
   const {
@@ -32,12 +31,8 @@ const ReviewAndConfirm = () => {
     closeModal: closeDeleteBatchModal,
   } = useModal()
   const {
-    transactions,
-    removeTransaction,
     removeAllTransactions,
-    replaceTransaction,
     submitTransactions,
-    reorderTransactions,
   } = useTransactions()
   const { downloadBatch, saveBatch } = useTransactionLibrary()
   const [showSimulation, setShowSimulation] = useState<boolean>(false)
@@ -65,23 +60,23 @@ const ReviewAndConfirm = () => {
     }
   }
 
+  const {isLoading, transactions} = useDbInteraction()
+
   return (
     <>
       <Wrapper>
         <StyledTitle size="xl">Review and Confirm</StyledTitle>
 
-        { transactions.length > 0 && (
-          <TransactionsBatchList
-            batchTitle={'Transactions Batch'}
-            transactions={transactions}
-            removeTransaction={removeTransaction}
-            saveBatch={saveBatch}
-            downloadBatch={downloadBatch}
-            reorderTransactions={reorderTransactions}
-            replaceTransaction={replaceTransaction}
-            showTransactionDetails
-            showBatchHeader
-          />
+        { !isLoading ?
+          transactions.length > 0 && (
+            <TransactionsBatchList
+              batchTitle={'Transactions Batch'}
+              transactions={transactions}
+              showTransactionDetails
+              showBatchHeader
+            />
+          ) : (
+            <Loader size="lg" color="secondary" />
         )}
 
         {/*<ButtonsWrapper>*/}

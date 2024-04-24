@@ -1,7 +1,6 @@
 import { FC, useState } from 'react'
 import { Button, Text, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
-import { useNetwork } from '../store'
 
 import { TextFieldInput } from '@gnosis.pm/safe-react-components'
 import { useSam } from '../store/samContext'
@@ -10,20 +9,18 @@ const ModuleConfiguration: FC = () => {
   const [module, setModule] = useState(false)
 
   const {
-    interfaceRepo,
-    web3,
-    chainInfo,
-    safe,
-    sdk,
-  } = useNetwork()
-
-  const {
     zkWalletAddress,
+    threshold,
     listOfOwners,
     moduleEnabled,
     createModule,
     enableModule,
+    changeListOfOwners,
+    changeThreshold,
   } = useSam()
+
+  const [localListOfOwners, setLocalListOfOwners] = useState<string>(listOfOwners)
+  const [localThreshold, setLocalThreshold] = useState<number>(threshold)
 
   const onModuleCreate = async () => {
     createModule()
@@ -38,7 +35,15 @@ const ModuleConfiguration: FC = () => {
   }
 
   const onModuleUpdate = () => {
-    // TODO
+    // TODO: Add simple validation
+
+    if (listOfOwners !== localListOfOwners) {
+      changeListOfOwners(localListOfOwners)
+    }
+
+    if (threshold !== localThreshold) {
+      changeThreshold(localThreshold)
+    }
   }
 
   const onModuleDisable = () => {
@@ -60,23 +65,24 @@ const ModuleConfiguration: FC = () => {
         </WalletAddressText>
       )}
 
-      <StyledTextFieldInput
+      <TextFieldInput
         name="list-of-owners"
         label="List of owners"
         fullWidth
         multiline
         minRows={7}
-        value={listOfOwners}
+        value={localListOfOwners}
         variant="filled"
-        // onChange={(event) => setListOfOwners(event.target.value)}
+        onChange={(event) => setLocalListOfOwners(event.target.value)}
       />
 
       {module && (
         <TextFieldInput
+          style={{ marginTop: '1rem' }}
           name="threshold"
           type="number"
           label="Threshold"
-          value={safe.threshold}
+          value={threshold}
         />
       )}
 
@@ -142,10 +148,6 @@ const StyledTitle = styled(Title)`
 `
 
 const WalletAddressText = styled(Text)`
-  margin-bottom: 2em;
-`
-
-const StyledTextFieldInput = styled(TextFieldInput)`
   margin-bottom: 2em;
 `
 

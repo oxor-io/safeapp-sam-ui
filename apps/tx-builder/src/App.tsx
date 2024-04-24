@@ -15,8 +15,6 @@ import {
 } from './routes/routes'
 
 const App = () => {
-  console.log(process.env)
-
   return (
     <>
       {/* App Header */}
