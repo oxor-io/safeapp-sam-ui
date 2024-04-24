@@ -25,7 +25,7 @@ const Header = () => {
             </Text>
           </StyledLink>
 
-          { moduleEnabled && (
+          { !moduleEnabled && (
             <>
               <StyledLink to={DASHBOARD_PATH}>
                 <Text size="xl">
@@ -51,7 +51,7 @@ const Header = () => {
             <Text size="sm">
               Root:
               {' '}
-              '7378323513472991738372527896654445137493089583233093119951646841738120031371
+              {root}
             </Text>
 
             <Text size="sm">

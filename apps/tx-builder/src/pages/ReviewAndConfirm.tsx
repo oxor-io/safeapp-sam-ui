@@ -84,46 +84,46 @@ const ReviewAndConfirm = () => {
           />
         )}
 
-        <ButtonsWrapper>
-          {/* Send batch button */}
-          <Button
-            size="md"
-            type="button"
-            disabled={!transactions.length}
-            variant="contained"
-            color="primary"
-            onClick={createBatch}
-          >
-            <FixedIcon type={'arrowSentWhite'} />
-            <StyledButtonLabel>Send Batch</StyledButtonLabel>
-          </Button>
+        {/*<ButtonsWrapper>*/}
+        {/*  /!* Send batch button *!/*/}
+        {/*  <Button*/}
+        {/*    size="md"*/}
+        {/*    type="button"*/}
+        {/*    disabled={!transactions.length}*/}
+        {/*    variant="contained"*/}
+        {/*    color="primary"*/}
+        {/*    onClick={createBatch}*/}
+        {/*  >*/}
+        {/*    <FixedIcon type={'arrowSentWhite'} />*/}
+        {/*    <StyledButtonLabel>Send Batch</StyledButtonLabel>*/}
+        {/*  </Button>*/}
 
-          {/* Cancel batch button */}
-          <Button
-            size="md"
-            type="button"
-            disabled={!transactions.length}
-            variant="bordered"
-            color="error"
-            onClick={openDeleteBatchModal}
-          >
-            Cancel
-          </Button>
+        {/*  /!* Cancel batch button *!/*/}
+        {/*  <Button*/}
+        {/*    size="md"*/}
+        {/*    type="button"*/}
+        {/*    disabled={!transactions.length}*/}
+        {/*    variant="bordered"*/}
+        {/*    color="error"*/}
+        {/*    onClick={openDeleteBatchModal}*/}
+        {/*  >*/}
+        {/*    Cancel*/}
+        {/*  </Button>*/}
 
-          {/* Simulate batch button */}
-          {simulationSupported && (
-            <Button
-              size="md"
-              type="button"
-              variant="contained"
-              color="secondary"
-              disabled={!transactions.length}
-              onClick={clickSimulate}
-            >
-              Simulate
-            </Button>
-          )}
-        </ButtonsWrapper>
+        {/*  /!* Simulate batch button *!/*/}
+        {/*  {simulationSupported && (*/}
+        {/*    <Button*/}
+        {/*      size="md"*/}
+        {/*      type="button"*/}
+        {/*      variant="contained"*/}
+        {/*      color="secondary"*/}
+        {/*      disabled={!transactions.length}*/}
+        {/*      onClick={clickSimulate}*/}
+        {/*    >*/}
+        {/*      Simulate*/}
+        {/*    </Button>*/}
+        {/*  )}*/}
+        {/*</ButtonsWrapper>*/}
 
         {/* Simulation statuses */}
         {showSimulation && (

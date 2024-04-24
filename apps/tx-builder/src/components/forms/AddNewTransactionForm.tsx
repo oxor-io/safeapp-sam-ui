@@ -60,6 +60,9 @@ const AddNewTransactionForm = ({
           <Button size="md" color="primary" type="submit">
             Add transaction
           </Button>
+          <Button size="md" color="secondary" type="submit">
+            Generate Proof
+          </Button>
         </ButtonContainer>
       </SolidityForm>
     </>

@@ -175,8 +175,6 @@ const Dashboard = (): ReactElement => {
           )}
         </AddNewTransactionFormWrapper>
 
-        <Outlet />
-
         <ZkProofWindow />
       </Grid>
 

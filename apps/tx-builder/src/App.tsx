@@ -59,13 +59,13 @@ const App = () => {
         {/* Dashboard Screen (Create transactions) */}
         <Route path={DASHBOARD_PATH} element={<Dashboard />}>
           {/* Transactions Batch section */}
-          <Route index element={<CreateTransactions />} />
+          {/*<Route index element={<CreateTransactions />} />*/}
 
           {/* Save Batch section */}
-          <Route path={SAVE_BATCH_PATH} element={<SaveTransactionLibrary />} />
+          {/*<Route path={SAVE_BATCH_PATH} element={<SaveTransactionLibrary />} />*/}
 
           {/* Edit Batch section */}
-          <Route path={EDIT_BATCH_PATH} element={<EditTransactionLibrary />} />
+          {/*<Route path={EDIT_BATCH_PATH} element={<EditTransactionLibrary />} />*/}
         </Route>
 
         {/* Review & Confirm Screen */}

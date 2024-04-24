@@ -32,7 +32,7 @@ const ZkProofWindow = () => {
           onClick={handleSafe}
           fullWidth
           size="lg"
-          color="secondary"
+          color="primary"
           variant="bordered"
         >
           Save
@@ -46,8 +46,6 @@ export default ZkProofWindow
 
 const Wrapper = styled.div`
   padding: 2rem 0;
-  width: 100%;
-
 `
 
 const Content = styled.div`
