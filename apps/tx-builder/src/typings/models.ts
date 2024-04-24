@@ -1,3 +1,9 @@
+export interface SamTransaction extends ProposedTransaction {
+  nonce: number
+  confirmed: boolean
+  proofs: string[]
+}
+
 export interface ProposedTransaction {
   id: number
   contractInterface: ContractInterface | null

@@ -6,7 +6,7 @@ import {
   DASHBOARD_PATH,
   HOME_PATH,
   REVIEW_AND_CONFIRM_PATH,
-  TRANSACTION_LIBRARY_PATH,
+  CONFIRMED_PATH,
 } from '../routes/routes'
 import { useSam } from '../store/samContext'
 import ChecksumWarning from './ChecksumWarning'
@@ -25,7 +25,7 @@ const Header = () => {
             </Text>
           </StyledLink>
 
-          { moduleEnabled && (
+          { !moduleEnabled && (
             <>
               <StyledLink to={DASHBOARD_PATH}>
                 <Text size="xl">
@@ -37,7 +37,7 @@ const Header = () => {
                   Pending
                 </Text>
               </StyledLink>
-              <StyledLink to={TRANSACTION_LIBRARY_PATH}>
+              <StyledLink to={CONFIRMED_PATH}>
                 <Text size="xl">
                   Confirmed
                 </Text>
@@ -51,7 +51,7 @@ const Header = () => {
             <Text size="sm">
               Root:
               {' '}
-              '7378323513472991738372527896654445137493089583233093119951646841738120031371
+              {root}
             </Text>
 
             <Text size="sm">

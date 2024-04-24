@@ -1,26 +1,24 @@
 import { useState } from 'react'
 import { WitnessData } from './useGenerateCircuitInputs'
 
-const useCircomProof = () => {
-  const [proof, setProof] = useState<string | null>(null)
-  const [loading, setLoading] = useState<boolean>(false)
+export const useCircomProof = () => {
+  const [proof, setProof] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<Error | null>(null)
 
   const generateCircomProof = async (inputData: WitnessData) => {
-    setLoading(true)
+    setIsLoading(true)
     try {
-      // TODO: Replace null with function for proof generating via Circom circuit
-      const proofData = null
+      // TODO: Replace ... with function for proof generating via Circom circuit
+      // const proofData = ....
 
-      setProof(proofData)
-      setLoading(false)
+      // setProof(proofData)
+      setIsLoading(false)
     } catch (error) {
       setError(error as Error)
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  return { proof, loading, error, generateCircomProof }
+  return { proof, isLoading, error, generateCircomProof }
 }
-
-export default useCircomProof

@@ -142,65 +142,65 @@ const TransactionsBatchList = ({
         {showBatchHeader && (
           <TransactionHeader>
             {/* Transactions Batch Counter */}
-            <TransactionCounterDot color="tag">
-              <Text size="xl" color="white">
-                {transactions.length}
-              </Text>
-            </TransactionCounterDot>
+            {/*<TransactionCounterDot color="tag">*/}
+            {/*  <Text size="xl" color="white">*/}
+            {/*    {transactions.length}*/}
+            {/*  </Text>*/}
+            {/*</TransactionCounterDot>*/}
 
-            {/* Transactions Batch Title */}
-            {batchTitle && (
-              <TransactionsTitle withoutMargin size="lg">
-                {batchTitle}
-              </TransactionsTitle>
-            )}
+            {/*/!* Transactions Batch Title *!/*/}
+            {/*{batchTitle && (*/}
+            {/*  <TransactionsTitle withoutMargin size="lg">*/}
+            {/*    {batchTitle}*/}
+            {/*  </TransactionsTitle>*/}
+            {/*)}*/}
 
             {/* Transactions Batch Actions */}
-            {saveBatch && (
-              <Tooltip
-                placement="top"
-                title="Save to Library"
-                backgroundColor="primary"
-                textColor="white"
-                arrow
-              >
-                <StyledHeaderIconButton onClick={openSaveBatchModal}>
-                  <Icon
-                    size="sm"
-                    type={batch ? 'bookmarkFilled' : 'bookmark'}
-                    color="primary"
-                    aria-label="Save to Library"
-                  />
-                </StyledHeaderIconButton>
-              </Tooltip>
-            )}
-            {downloadBatch && (
-              <Tooltip
-                placement="top"
-                title="Download"
-                backgroundColor="primary"
-                textColor="white"
-                arrow
-              >
-                <StyledHeaderIconButton onClick={() => downloadBatch(fileName, transactions)}>
-                  <Icon size="sm" type="importImg" color="primary" aria-label="Download" />
-                </StyledHeaderIconButton>
-              </Tooltip>
-            )}
+            {/*{saveBatch && (*/}
+            {/*  <Tooltip*/}
+            {/*    placement="top"*/}
+            {/*    title="Save to Library"*/}
+            {/*    backgroundColor="primary"*/}
+            {/*    textColor="white"*/}
+            {/*    arrow*/}
+            {/*  >*/}
+            {/*    <StyledHeaderIconButton onClick={openSaveBatchModal}>*/}
+            {/*      <Icon*/}
+            {/*        size="sm"*/}
+            {/*        type={batch ? 'bookmarkFilled' : 'bookmark'}*/}
+            {/*        color="primary"*/}
+            {/*        aria-label="Save to Library"*/}
+            {/*      />*/}
+            {/*    </StyledHeaderIconButton>*/}
+            {/*  </Tooltip>*/}
+            {/*)}*/}
+            {/*{downloadBatch && (*/}
+            {/*  <Tooltip*/}
+            {/*    placement="top"*/}
+            {/*    title="Download"*/}
+            {/*    backgroundColor="primary"*/}
+            {/*    textColor="white"*/}
+            {/*    arrow*/}
+            {/*  >*/}
+            {/*    <StyledHeaderIconButton onClick={() => downloadBatch(fileName, transactions)}>*/}
+            {/*      <Icon size="sm" type="importImg" color="primary" aria-label="Download" />*/}
+            {/*    </StyledHeaderIconButton>*/}
+            {/*  </Tooltip>*/}
+            {/*)}*/}
 
-            {removeAllTransactions && (
-              <Tooltip
-                placement="top"
-                title="Clear transactions"
-                backgroundColor="primary"
-                textColor="white"
-                arrow
-              >
-                <StyledHeaderIconButton onClick={openClearTransactions}>
-                  <Icon size="sm" type="delete" color="error" aria-label="Clear transactions" />
-                </StyledHeaderIconButton>
-              </Tooltip>
-            )}
+            {/*{removeAllTransactions && (*/}
+            {/*  <Tooltip*/}
+            {/*    placement="top"*/}
+            {/*    title="Clear transactions"*/}
+            {/*    backgroundColor="primary"*/}
+            {/*    textColor="white"*/}
+            {/*    arrow*/}
+            {/*  >*/}
+            {/*    <StyledHeaderIconButton onClick={openClearTransactions}>*/}
+            {/*      <Icon size="sm" type="delete" color="error" aria-label="Clear transactions" />*/}
+            {/*    </StyledHeaderIconButton>*/}
+            {/*  </Tooltip>*/}
+            {/*)}*/}
           </TransactionHeader>
         )}
 
@@ -219,7 +219,7 @@ const TransactionsBatchList = ({
                       key={transaction.id}
                       index={index}
                       draggableId={transaction.id.toString()}
-                      isDragDisabled={!reorderTransactions}
+                      isDragDisabled={true}
                     >
                       {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                         <Item

@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
 import { AddressInput, Divider, Switch, Text, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
 import InputAdornment from '@material-ui/core/InputAdornment'
@@ -13,14 +12,22 @@ import JsonField from '../components/forms/fields/JsonField'
 import { ContractInterface } from '../typings/models'
 import { useNetwork } from '../store'
 import { useAbi } from '../hooks/useAbi'
+import { useCircomProof } from '../hooks/useCircomProof'
+import { useDbInteraction } from '../hooks/useDbInteraction'
+import { useGenerateCircuitInputs } from '../hooks/useGenerateCircuitInputs'
 import { ImplementationABIDialog } from '../components/modals/ImplementationABIDialog'
 import ZkProofWindow from '../components/ZkProofWindow'
+import { parseFormToProposedTransaction, SolidityFormValuesTypes } from '../components/forms/SolidityForm'
+import { useNavigate } from 'react-router-dom'
+import { ProposedTransaction } from '../typings/models'
+import { REVIEW_AND_CONFIRM_PATH } from '../routes/routes'
 
 const Dashboard = (): ReactElement => {
   const [abiAddress, setAbiAddress] = useState('')
   const [transactionRecipientAddress, setTransactionRecipientAddress] = useState('')
   const [contract, setContract] = useState<ContractInterface | null>(null)
   const [showHexEncodedData, setShowHexEncodedData] = useState<boolean>(false)
+  const [proposedTransaction, setProposedTransaction] = useState<ProposedTransaction | null>()
   const { abi, abiStatus, setAbi } = useAbi(abiAddress)
   const [implementationABIDialog, setImplementationABIDialog] = useState({
     open: false,
@@ -34,7 +41,13 @@ const Dashboard = (): ReactElement => {
     getAddressFromDomain,
     web3,
     chainInfo,
+    nativeCurrencySymbol,
   } = useNetwork()
+  const navigate = useNavigate()
+
+  const { saveTransaction } = useDbInteraction()
+  const { generateInputs } = useGenerateCircuitInputs()
+  const { proof, generateCircomProof } = useCircomProof()
 
   useEffect(() => {
     if (!abi || !interfaceRepo) {
@@ -95,6 +108,27 @@ const Dashboard = (): ReactElement => {
     },
     [abiAddress, interfaceRepo, web3],
   )
+
+  const onGenerateProof = async (values: SolidityFormValuesTypes) => {
+    const newProposedTransaction = parseFormToProposedTransaction(
+      values,
+      contract,
+      nativeCurrencySymbol,
+      networkPrefix,
+    )
+
+    setProposedTransaction(newProposedTransaction)
+
+    // TODO
+    // const circomData = generateInputs()
+    // await generateCircomProof(circomData)
+  }
+
+  const onSaveTransaction = () => {
+    // saveTransaction()
+
+    navigate(REVIEW_AND_CONFIRM_PATH)
+  }
 
   if (!chainInfo) {
     return <div />
@@ -170,14 +204,16 @@ const Dashboard = (): ReactElement => {
                 contract={contract}
                 to={transactionRecipientAddress}
                 showHexEncodedData={showHexEncodedData}
+                onSubmit={onGenerateProof}
               />
             </>
           )}
         </AddNewTransactionFormWrapper>
 
-        <Outlet />
-
-        <ZkProofWindow />
+        <ZkProofWindow
+          proof={proof}
+          onSaveTransaction={onSaveTransaction}
+        />
       </Grid>
 
       {implementationABIDialog.open && (

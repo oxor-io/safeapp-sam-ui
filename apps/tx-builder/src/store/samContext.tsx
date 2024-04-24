@@ -5,15 +5,18 @@ import { Contract } from 'web3-eth-contract'
 import { useNetwork } from './networkContext'
 import safeAnonymizationModule from '../contracts/SafeAnonymizationModule.json'
 import safeProxyFactory from '../contracts/SafeProxyFactory.json'
+import safeModule from '../contracts/Safe.json'
 
 type SamContextProps = {
   zkWalletAddress: string | null
   listOfOwners: string
-  threshold: number | null
+  threshold: number
   root: string| null
   moduleEnabled: boolean
   createModule: () => void
   enableModule: () => void
+  changeListOfOwners: (newValue: string) => void
+  changeThreshold: (newValue: number) => void
 }
 
 export const SamContext = createContext<SamContextProps | null>(null)
@@ -21,11 +24,12 @@ export const SamContext = createContext<SamContextProps | null>(null)
 const SamProvider: FC = ({ children }) => {
   const [safeProxyFactoryContract, setSafeProxyFactoryContract] = useState<Contract | null>(null)
   const [samContract, setSamContract] = useState<Contract | null>(null)
+  const [safeContract, setSafeContract] = useState<Contract | null>(null)
 
   const [listOfOwners, setListOfOwners] = useState('')
   const [zkWalletAddress, setZkWalletAddress] = useState<string | null>(null)
   const [root, setRoot] = useState<string | null>(null)
-  const [threshold, setThreshold] = useState<number | null>(null)
+  const [threshold, setThreshold] = useState<number>(1)
   const [moduleEnabled, setModuleEnabled] = useState<boolean>(false)
 
   const { sdk, web3, safe } = useNetwork()
@@ -41,50 +45,95 @@ const SamProvider: FC = ({ children }) => {
 
     const initSamContract = new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], safeAnonymizationModule.address)
     setSamContract(initSamContract)
+
+    const initSafeContract = new web3.eth.Contract(safeModule.abi as AbiItem[], safe.safeAddress)
+    setSafeContract(initSafeContract)
   }, [web3])
 
   const createModule = async () => {
-    if (!web3 || !samContract) {
+    if (!web3 || !samContract || !safeProxyFactoryContract || !safeContract) {
       return
     }
 
-    const testRoot = '7378323513472991738372527896654445137493089583233093119951646841738120031371'
-    const testSalt = '7777'
+    // TODO: provide real root
+    const testRoot = '7378323513472994738372527896654446137493089583233093119951646841738120031371'
+    const testSalt = toBN('7777').toString()
+    const threshold = toBN(1).toString()
 
-    const setupMessage = samContract.methods.setup(safe.safeAddress, testRoot, testSalt).encodeABI()
+    const initDataSAM = samContract.methods.setup(safe.safeAddress, testRoot, threshold).encodeABI()
+    const createProxyData = safeProxyFactoryContract
+      .methods
+      .createChainSpecificProxyWithNonce(safeAnonymizationModule.address, initDataSAM, testSalt)
+      .encodeABI()
 
-    const tx = await sdk.txs.send({
+    const createSamTx = await sdk.txs.send({
       txs: [
         {
           value: '0',
-          to: safeAnonymizationModule.address,
-          data: setupMessage,
+          to: safeProxyFactory.address,
+          data: createProxyData,
         },
       ],
       params: {
         safeTxGas: 500000,
       }
     })
+
+    console.log(createSamTx.safeTxHash)
+
+    // TODO: Get address from previous transaction and set it to state
+    // setZkWalletAddress()
   }
 
-  const enableModule = () => {
-    // TODO
+  const enableModule = async () => {
+    if (!safeContract) {
+      return
+    }
+
+    const enableModuleData = safeContract.methods.enableModule(zkWalletAddress).encodeABI()
+
+    const moduleEnableTx = await sdk.txs.send({
+      txs: [
+        {
+          value: '0',
+          to: safe.safeAddress,
+          data: enableModuleData,
+        },
+      ],
+      params: {
+        safeTxGas: 1000000,
+      }
+    })
   }
 
-  const changeParameters = (what: 'root' | 'threshold', newValue: string | number) => {
+  const changeListOfOwners = async (newValue: string) => {
+    // TODO:
+    // const newRoot = generateRoot()
+
+    // await changeParameters('root', newRoot)
+    // setListOfOwners(newValue)
+    // setRoot(newRoot)
+  }
+
+  const changeThreshold = async (newValue: number) => {
+    await changeParameters("threshold", newValue)
+  }
+
+  const changeParameters = async (what: 'root' | 'threshold', newValue: string | number) => {
     if (!samContract) {
       return
     }
 
     const whatBytes32 = utf8ToHex(what)
-    const newValueUint256 = toBN(newValue)
+    const newValueUint256 = toBN(newValue).toString()
 
-    const fileMessage = samContract.methods.file(
+    const fileData = samContract.methods.file(
       whatBytes32,
       newValueUint256
     ).encodeABI()
 
-    // TODO: set up sending fileMessage to the SAM contract correctly
+    // TODO: set up sending fileData to the SAM contract correctly
+    // await sdk.txs.send()
   }
 
   return (
@@ -97,6 +146,8 @@ const SamProvider: FC = ({ children }) => {
         moduleEnabled,
         createModule,
         enableModule,
+        changeListOfOwners,
+        changeThreshold,
       }}
     >
       {children}

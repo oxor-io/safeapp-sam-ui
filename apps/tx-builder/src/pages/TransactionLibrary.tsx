@@ -21,8 +21,8 @@ import DeleteBatchFromLibrary from '../components/modals/DeleteBatchFromLibrary'
 import TransactionsBatchList from '../components/TransactionsBatchList'
 import useModal from '../hooks/useModal/useModal'
 import {
+  DASHBOARD_PATH,
   getEditBatchUrl,
-  HOME_PATH,
   REVIEW_AND_CONFIRM_PATH,
   TRANSACTION_LIBRARY_PATH,
 } from '../routes/routes'
@@ -41,8 +41,8 @@ const TransactionLibrary = () => {
   } = useModal()
   const [batchToRemove, setBatchToRemove] = useState<Batch>()
 
-  const hrefToHome = useHref(HOME_PATH)
-  const internalOnClick = useLinkClickHandler(HOME_PATH)
+  const hrefToHome = useHref(DASHBOARD_PATH)
+  const internalOnClick = useLinkClickHandler(DASHBOARD_PATH)
   const redirectToHome = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     internalOnClick(event)
   }

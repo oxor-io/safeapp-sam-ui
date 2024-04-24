@@ -106,17 +106,17 @@ const TransactionBatchListItem = memo(
               style={{ cursor: reorderTransactions ? 'grab' : 'pointer' }}
             >
               {/* Drag & Drop Indicator */}
-              {reorderTransactions && (
-                <Tooltip
-                  placement="top"
-                  title="Drag and Drop"
-                  backgroundColor="primary"
-                  textColor="white"
-                  arrow
-                >
-                  <DragAndDropIndicatorIcon fontSize="small" />
-                </Tooltip>
-              )}
+              {/*{reorderTransactions && (*/}
+              {/*  <Tooltip*/}
+              {/*    placement="top"*/}
+              {/*    title="Drag and Drop"*/}
+              {/*    backgroundColor="primary"*/}
+              {/*    textColor="white"*/}
+              {/*    arrow*/}
+              {/*  >*/}
+              {/*    <DragAndDropIndicatorIcon fontSize="small" />*/}
+              {/*  </Tooltip>*/}
+              {/*)}*/}
 
               {/* Destination Address label */}
               <EthHashInfo
@@ -132,44 +132,44 @@ const TransactionBatchListItem = memo(
               {/* Transaction Actions */}
 
               {/* Edit transaction */}
-              {replaceTransaction && (
-                <Tooltip title="Edit transaction" backgroundColor="primary" textColor="white" arrow>
-                  <TransactionActionButton
-                    size="medium"
-                    aria-label="Edit transaction"
-                    onClick={event => {
-                      event.stopPropagation()
-                      setTxIndexToEdit(String(index))
-                      openEditTxModal()
-                    }}
-                  >
-                    <Icon size="sm" type="edit" />
-                  </TransactionActionButton>
-                </Tooltip>
-              )}
+              {/*{replaceTransaction && (*/}
+              {/*  <Tooltip title="Edit transaction" backgroundColor="primary" textColor="white" arrow>*/}
+              {/*    <TransactionActionButton*/}
+              {/*      size="medium"*/}
+              {/*      aria-label="Edit transaction"*/}
+              {/*      onClick={event => {*/}
+              {/*        event.stopPropagation()*/}
+              {/*        setTxIndexToEdit(String(index))*/}
+              {/*        openEditTxModal()*/}
+              {/*      }}*/}
+              {/*    >*/}
+              {/*      <Icon size="sm" type="edit" />*/}
+              {/*    </TransactionActionButton>*/}
+              {/*  </Tooltip>*/}
+              {/*)}*/}
 
               {/* Delete transaction */}
-              {removeTransaction && (
-                <Tooltip
-                  placement="top"
-                  title="Delete transaction"
-                  backgroundColor="primary"
-                  textColor="white"
-                  arrow
-                >
-                  <TransactionActionButton
-                    onClick={event => {
-                      event.stopPropagation()
-                      setTxIndexToRemove(String(index))
-                      openDeleteTxModal()
-                    }}
-                    size="medium"
-                    aria-label="Delete transaction"
-                  >
-                    <Icon size="sm" type="delete" />
-                  </TransactionActionButton>
-                </Tooltip>
-              )}
+              {/*{removeTransaction && (*/}
+              {/*  <Tooltip*/}
+              {/*    placement="top"*/}
+              {/*    title="Delete transaction"*/}
+              {/*    backgroundColor="primary"*/}
+              {/*    textColor="white"*/}
+              {/*    arrow*/}
+              {/*  >*/}
+              {/*    <TransactionActionButton*/}
+              {/*      onClick={event => {*/}
+              {/*        event.stopPropagation()*/}
+              {/*        setTxIndexToRemove(String(index))*/}
+              {/*        openDeleteTxModal()*/}
+              {/*      }}*/}
+              {/*      size="medium"*/}
+              {/*      aria-label="Delete transaction"*/}
+              {/*    >*/}
+              {/*      <Icon size="sm" type="delete" />*/}
+              {/*    </TransactionActionButton>*/}
+              {/*  </Tooltip>*/}
+              {/*)}*/}
 
               {/* Expand transaction details */}
               {showTransactionDetails && (
