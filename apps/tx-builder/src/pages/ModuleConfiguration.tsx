@@ -25,7 +25,6 @@ const ModuleConfiguration: FC = () => {
     enableModule,
   } = useSam()
 
-
   const onModuleCreate = async () => {
     createModule()
 
