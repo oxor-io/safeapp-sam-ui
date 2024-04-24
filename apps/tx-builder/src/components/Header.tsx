@@ -6,7 +6,7 @@ import {
   DASHBOARD_PATH,
   HOME_PATH,
   REVIEW_AND_CONFIRM_PATH,
-  TRANSACTION_LIBRARY_PATH,
+  CONFIRMED_PATH,
 } from '../routes/routes'
 import { useSam } from '../store/samContext'
 import ChecksumWarning from './ChecksumWarning'
@@ -37,7 +37,7 @@ const Header = () => {
                   Pending
                 </Text>
               </StyledLink>
-              <StyledLink to={TRANSACTION_LIBRARY_PATH}>
+              <StyledLink to={CONFIRMED_PATH}>
                 <Text size="xl">
                   Confirmed
                 </Text>

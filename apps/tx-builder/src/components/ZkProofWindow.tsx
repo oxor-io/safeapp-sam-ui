@@ -1,43 +1,41 @@
-import { useState } from 'react'
+import { FC } from 'react'
 
 import { Button, TextFieldInput, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
 
-const ZkProofWindow = () => {
-  const [proof, setProof] = useState('')
+interface ComponentProps {
+  proof: string
+  onSaveTransaction: () => void
+}
 
-  const handleSafe = () => {
-    console.log('Proof saved!')
-  }
-
+const ZkProofWindow: FC<ComponentProps> = ({proof, onSaveTransaction}) => {
   return (
     <Wrapper>
-      <Content>
-        <StyledTitle size="lg">
-          ZK Proof
-        </StyledTitle>
+      <StyledTitle size="lg">
+        ZK Proof
+      </StyledTitle>
 
-        <StyledTextFieldInput
-          name="proof"
-          label="Proof"
-          fullWidth
-          minRows={7}
-          value={proof}
-          variant="filled"
-          onChange={(event) => setProof(event.target.value)}
-          multiline
-        />
+      <StyledTextFieldInput
+        name="proof"
+        label="Proof"
+        fullWidth
+        minRows={7}
+        value={proof}
+        variant="filled"
+        multiline
+      />
 
-        <Button
-          onClick={handleSafe}
-          fullWidth
-          size="lg"
-          color="primary"
-          variant="bordered"
-        >
-          Save
-        </Button>
-      </Content>
+      <Button
+        onClick={onSaveTransaction}
+        fullWidth
+        size="lg"
+        color="primary"
+        disabled={!proof}
+        variant="bordered"
+        style={{ marginTop: '2em' }}
+      >
+        Save
+      </Button>
     </Wrapper>
   )
 }
@@ -45,11 +43,8 @@ const ZkProofWindow = () => {
 export default ZkProofWindow
 
 const Wrapper = styled.div`
-  padding: 2rem 0;
-`
-
-const Content = styled.div`
-  max-width: 600px;
+  padding: 2rem 1.5rem;
+  flex: 1;
 `
 
 const StyledTitle = styled(Title)`
@@ -58,5 +53,4 @@ const StyledTitle = styled(Title)`
 `
 
 const StyledTextFieldInput = styled(TextFieldInput)`
-  margin-bottom: 2em;
 `

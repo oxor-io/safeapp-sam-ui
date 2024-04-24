@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
 import { AddressInput, Divider, Switch, Text, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
 import InputAdornment from '@material-ui/core/InputAdornment'
@@ -11,10 +10,14 @@ import { evalTemplate, FETCH_STATUS, isValidAddress } from '../utils'
 import AddNewTransactionForm from '../components/forms/AddNewTransactionForm'
 import JsonField from '../components/forms/fields/JsonField'
 import { ContractInterface } from '../typings/models'
-import { useNetwork } from '../store'
+import { useNetwork, useTransactions } from '../store'
 import { useAbi } from '../hooks/useAbi'
+import { useCircomProof } from '../hooks/useCircomProof'
 import { ImplementationABIDialog } from '../components/modals/ImplementationABIDialog'
 import ZkProofWindow from '../components/ZkProofWindow'
+import { parseFormToProposedTransaction, SolidityFormValuesTypes } from '../components/forms/SolidityForm'
+import { useNavigate } from 'react-router-dom'
+import { REVIEW_AND_CONFIRM_PATH } from '../routes/routes'
 
 const Dashboard = (): ReactElement => {
   const [abiAddress, setAbiAddress] = useState('')
@@ -34,7 +37,14 @@ const Dashboard = (): ReactElement => {
     getAddressFromDomain,
     web3,
     chainInfo,
+    nativeCurrencySymbol,
   } = useNetwork()
+
+  const { addTransaction } = useTransactions()
+
+  const navigate = useNavigate()
+
+  const {} = useCircomProof()
 
   useEffect(() => {
     if (!abi || !interfaceRepo) {
@@ -95,6 +105,21 @@ const Dashboard = (): ReactElement => {
     },
     [abiAddress, interfaceRepo, web3],
   )
+
+  const onGenerateProof = (values: SolidityFormValuesTypes) => {
+    const proposedTransaction = parseFormToProposedTransaction(
+      values,
+      contract,
+      nativeCurrencySymbol,
+      networkPrefix,
+    )
+
+    addTransaction(proposedTransaction)
+  }
+
+  const onSaveTransaction = () => {
+    navigate(REVIEW_AND_CONFIRM_PATH)
+  }
 
   if (!chainInfo) {
     return <div />
@@ -170,12 +195,16 @@ const Dashboard = (): ReactElement => {
                 contract={contract}
                 to={transactionRecipientAddress}
                 showHexEncodedData={showHexEncodedData}
+                onSubmit={onGenerateProof}
               />
             </>
           )}
         </AddNewTransactionFormWrapper>
 
-        <ZkProofWindow />
+        <ZkProofWindow
+          proof=""
+          onSaveTransaction={onSaveTransaction}
+        />
       </Grid>
 
       {implementationABIDialog.open && (

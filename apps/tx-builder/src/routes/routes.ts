@@ -7,6 +7,7 @@ export const SAVE_BATCH_PATH = BATCH_PATH
 export const EDIT_BATCH_PATH = `${BATCH_PATH}/:batchId`
 
 export const REVIEW_AND_CONFIRM_PATH = '/review-and-confirm'
+export const CONFIRMED_PATH = '/confirmed'
 
 export const TRANSACTION_LIBRARY_PATH = '/transaction-library'
 

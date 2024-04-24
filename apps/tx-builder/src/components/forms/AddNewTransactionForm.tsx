@@ -7,39 +7,28 @@ import SolidityForm, {
   CONTRACT_METHOD_INDEX_FIELD_NAME,
   SolidityFormValuesTypes,
   TO_ADDRESS_FIELD_NAME,
-  parseFormToProposedTransaction,
 } from './SolidityForm'
-import { useTransactions, useNetwork } from '../../store'
+import { useNetwork } from '../../store'
 
 type AddNewTransactionFormProps = {
   contract: ContractInterface | null
   to: string
   showHexEncodedData: boolean
+  onSubmit: (values: SolidityFormValuesTypes) => void
 }
 
 const AddNewTransactionForm = ({
   contract,
   to,
   showHexEncodedData,
+  onSubmit,
 }: AddNewTransactionFormProps) => {
   const initialFormValues = {
     [TO_ADDRESS_FIELD_NAME]: isValidAddress(to) ? to : '',
     [CONTRACT_METHOD_INDEX_FIELD_NAME]: '0',
   }
 
-  const { addTransaction } = useTransactions()
   const { networkPrefix, getAddressFromDomain, nativeCurrencySymbol } = useNetwork()
-
-  const onSubmit = (values: SolidityFormValuesTypes) => {
-    const proposedTransaction = parseFormToProposedTransaction(
-      values,
-      contract,
-      nativeCurrencySymbol,
-      networkPrefix,
-    )
-
-    addTransaction(proposedTransaction)
-  }
 
   return (
     <>
@@ -57,9 +46,6 @@ const AddNewTransactionForm = ({
       >
         <ButtonContainer>
           {/* Add transaction btn */}
-          <Button size="md" color="primary" type="submit">
-            Add transaction
-          </Button>
           <Button size="md" color="secondary" type="submit">
             Generate Proof
           </Button>
