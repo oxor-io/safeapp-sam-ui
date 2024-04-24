@@ -45,9 +45,10 @@ const Dashboard = (): ReactElement => {
   } = useNetwork()
   const navigate = useNavigate()
 
-  const { saveTransaction } = useDbInteraction()
+  const { saveTransaction, removeTransaction, updateTransaction } = useDbInteraction()
   const { generateInputs } = useGenerateCircuitInputs()
   const { proof, generateCircomProof } = useCircomProof()
+
 
   useEffect(() => {
     if (!abi || !interfaceRepo) {
@@ -155,7 +156,7 @@ const Dashboard = (): ReactElement => {
             </Grid>
           </Grid>
 
-          <StyledDivider />
+          <StyledDivider/>
 
           {/* ABI Address Input */}
           <AddressInput
@@ -175,7 +176,7 @@ const Dashboard = (): ReactElement => {
             InputProps={{
               endAdornment: contractHasMethods && isValidAddress(abiAddress) && (
                 <InputAdornment position="end">
-                  <CheckIconAddressAdornment />
+                  <CheckIconAddressAdornment/>
                 </InputAdornment>
               ),
             }}
@@ -188,7 +189,7 @@ const Dashboard = (): ReactElement => {
             </StyledWarningText>
           )}
 
-          <JsonField id="abi" name="abi" label="Enter ABI" value={abi} onChange={setAbi} />
+          <JsonField id="abi" name="abi" label="Enter ABI" value={abi} onChange={setAbi}/>
 
           {/* No public methods Warning */}
           {showNoPublicMethodsWarning && (
@@ -199,7 +200,7 @@ const Dashboard = (): ReactElement => {
 
           {showNewTransactionForm && (
             <>
-              <StyledDivider />
+              <StyledDivider/>
               <AddNewTransactionForm
                 contract={contract}
                 to={transactionRecipientAddress}

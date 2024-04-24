@@ -46,9 +46,34 @@ export const useDbInteraction = () => {
     })
   }
 
+  const updateTransaction = async (transaction: Partial<ProposedTransaction>) => {
+    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions?id=eq.${transaction.id}`, {
+      method: 'UPDATE',
+      headers: {
+        "Content-Type": 'application/json',
+        "apiKey": REACT_APP_SUPABASE_KEY ?? '',
+        Authorization: `Bearer ${REACT_APP_SUPABASE_KEY ?? ''}`,
+      },
+      body: JSON.stringify(transaction),
+    })
+  }
+
+  const removeTransaction = async (transaction: Pick<ProposedTransaction, 'id'>) => {
+    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions?id=eq.${transaction.id}`, {
+      method: 'DELETE',
+      headers: {
+        "Content-Type": 'application/json',
+        "apiKey": REACT_APP_SUPABASE_KEY ?? '',
+        Authorization: `Bearer ${REACT_APP_SUPABASE_KEY ?? ''}`,
+      },
+    })
+  }
+
   return {
     transactions,
     isLoading,
     saveTransaction,
+    updateTransaction,
+    removeTransaction
   }
 }
