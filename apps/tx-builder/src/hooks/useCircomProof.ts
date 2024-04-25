@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { WitnessData } from './useGenerateCircuitInputs'
 
 export const useCircomProof = () => {
-  const [proof, setProof] = useState<string>('')
+  const [zkProof, setZkProof] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<Error | null>(null)
 
@@ -20,5 +20,5 @@ export const useCircomProof = () => {
     }
   }
 
-  return { proof, isLoading, error, generateCircomProof }
+  return { zkProof, isLoading, error, generateCircomProof }
 }

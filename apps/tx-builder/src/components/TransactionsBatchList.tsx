@@ -44,6 +44,7 @@ type TransactionsBatchListProps = {
   removeAllTransactions?: () => void
   replaceTransaction?: (newTransaction: ProposedTransaction, index: number) => void
   reorderTransactions?: (sourceIndex: number, destinationIndex: number) => void
+  onTransactionConfirm?: (id: number) => void
 }
 
 const TRANSACTION_LIST_DROPPABLE_ID = 'Transaction_List'
@@ -56,10 +57,9 @@ const TransactionsBatchList = ({
   removeAllTransactions,
   replaceTransaction,
   saveBatch,
-  downloadBatch,
   showTransactionDetails,
-  showBatchHeader,
   batchTitle,
+  onTransactionConfirm
 }: TransactionsBatchListProps) => {
   // we need those states to display the correct position in each tx during the drag & drop
   const { batch } = useTransactionLibrary()
@@ -139,8 +139,8 @@ const TransactionsBatchList = ({
     <>
       <TransactionsBatchWrapper>
         {/* Transactions Batch Header */}
-        {showBatchHeader && (
-          <TransactionHeader>
+        {/*{showBatchHeader && (*/}
+        {/*  <TransactionHeader>*/}
             {/* Transactions Batch Counter */}
             {/*<TransactionCounterDot color="tag">*/}
             {/*  <Text size="xl" color="white">*/}
@@ -201,8 +201,8 @@ const TransactionsBatchList = ({
             {/*    </StyledHeaderIconButton>*/}
             {/*  </Tooltip>*/}
             {/*)}*/}
-          </TransactionHeader>
-        )}
+          {/*</TransactionHeader>*/}
+        {/*)}*/}
 
         {/* Standard Transactions List */}
         {transactions.length <= 20 && (
@@ -240,6 +240,7 @@ const TransactionsBatchList = ({
                           removeTransaction={removeTransaction}
                           setTxIndexToRemove={setTxIndexToRemove}
                           openDeleteTxModal={openDeleteTxModal}
+                          onTransactionConfirm={onTransactionConfirm}
                         />
                       )}
                     </Draggable>

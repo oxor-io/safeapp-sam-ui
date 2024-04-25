@@ -11,13 +11,13 @@ type SamContextProps = {
   zkWalletAddress: string | null
   listOfOwners: string
   threshold: number
-  root: string| null
+  root: string
   moduleEnabled: boolean
-  createModule: () => void
-  enableModule: () => void
-  disableModule: () => void
-  changeListOfOwners: (newValue: string) => void
-  changeThreshold: (newValue: number) => void
+  createModule: (root: string, salt: string) => Promise<void>
+  enableModule: () => Promise<void>
+  disableModule: () => Promise<void>
+  changeRootWithOwners: (newRoot: string, newListOfOwners: string) => Promise<void>
+  changeThreshold: (newThreshold: number) => void
   getNonce: () => void
 }
 
@@ -31,7 +31,7 @@ const SamProvider: FC = ({ children }) => {
 
   const [listOfOwners, setListOfOwners] = useState('')
   const [zkWalletAddress, setZkWalletAddress] = useState<string | null>(null)
-  const [root, setRoot] = useState<string | null>(null)
+  const [root, setRoot] = useState<string>('')
   const [threshold, setThreshold] = useState<number>(1)
   const [moduleEnabled, setModuleEnabled] = useState<boolean>(false)
 
@@ -51,22 +51,19 @@ const SamProvider: FC = ({ children }) => {
 
     const initSafeContract = new web3.eth.Contract(safeModule.abi as AbiItem[], safe.safeAddress)
     setSafeContract(initSafeContract)
-  }, [web3])
+  }, [web3, safe.safeAddress])
 
-  const createModule = async () => {
+  const createModule = async (root: string, salt: string) => {
     if (!web3 || !samContract || !safeProxyFactoryContract || !safeContract) {
       return
     }
 
-    // TODO: provide real root
-    const testRoot = '7378344313172922733472523896454446657493085513233093119951646841738120031371'
-    const testSalt = toBN('2443').toString()
-    const threshold = toBN(1).toString()
+    const thresholdUint64 = toBN(threshold).toString()
+    const initDataSAM = samContract.methods.setup(safe.safeAddress, root, thresholdUint64).encodeABI()
 
-    const initDataSAM = samContract.methods.setup(safe.safeAddress, testRoot, threshold).encodeABI()
     const createProxyData = safeProxyFactoryContract
       .methods
-      .createChainSpecificProxyWithNonce(safeAnonymizationModule.address, initDataSAM, testSalt)
+      .createChainSpecificProxyWithNonce(safeAnonymizationModule.address, initDataSAM, salt)
       .encodeABI()
 
     const createSamTx = await sdk.txs.send({
@@ -82,8 +79,10 @@ const SamProvider: FC = ({ children }) => {
       }
     })
 
+    // FIXME: Check if previous logic is correct, now it seems that it's a random address
     const createdZkWalletAddress = toChecksumAddress('0x' + createSamTx.safeTxHash.slice(-40))
 
+    setRoot(root)
     setZkWalletAddress(createdZkWalletAddress)
     setZkWalletContract(new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], createdZkWalletAddress))
   }
@@ -116,7 +115,8 @@ const SamProvider: FC = ({ children }) => {
       return
     }
 
-    const enableModuleData = safeContract.methods.disableModule(zkWalletAddress, zkWalletAddress).encodeABI()
+    // FIXME: wrong arguments
+    const enableModuleData = safeContract.methods.disableModule(zkWalletAddress).encodeABI()
     await sdk.txs.send({
       txs: [
         {
@@ -133,17 +133,15 @@ const SamProvider: FC = ({ children }) => {
     setModuleEnabled(true)
   }
 
-  const changeListOfOwners = async (newValue: string) => {
-    // TODO:
-    // const newRoot = generateRoot()
-
-    // await changeParameters('root', newRoot)
-    // setListOfOwners(newValue)
-    // setRoot(newRoot)
+  const changeRootWithOwners = async (newRoot: string, newListOfOwners: string) => {
+    await changeParameters('root', newRoot)
+    setRoot(newRoot)
+    setListOfOwners(newListOfOwners)
   }
 
-  const changeThreshold = async (newValue: number) => {
-    await changeParameters("threshold", newValue)
+  const changeThreshold = async (newThreshold: number) => {
+    await changeParameters("threshold", newThreshold)
+    setThreshold(newThreshold)
   }
 
   const getNonce = async () => {
@@ -151,7 +149,7 @@ const SamProvider: FC = ({ children }) => {
       return
     }
 
-    zkWalletContract.methods.getNonce().call({ from: safe.safeAddress }).then(console.log).catch(console.log)
+    await zkWalletContract.methods.getNonce().call({ from: safe.safeAddress })
   }
 
   const changeParameters = async (what: 'root' | 'threshold', newValue: string | number) => {
@@ -192,12 +190,12 @@ const SamProvider: FC = ({ children }) => {
         createModule,
         enableModule,
         disableModule,
-        changeListOfOwners,
+        changeRootWithOwners,
         changeThreshold,
         getNonce,
       }}
     >
-      {children}
+      { children }
     </SamContext.Provider>
   )
 }

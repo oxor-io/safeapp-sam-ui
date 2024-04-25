@@ -74,6 +74,7 @@ const ReviewAndConfirm = () => {
               transactions={transactions}
               showTransactionDetails
               showBatchHeader
+              onTransactionConfirm={(id) => console.log('Approve transaction with id:', id)}
             />
           ) : (
             <Loader size="lg" color="secondary" />

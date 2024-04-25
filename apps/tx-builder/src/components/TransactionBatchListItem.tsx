@@ -1,15 +1,13 @@
 import {
   Accordion,
   AccordionSummary,
+  Button,
   Dot,
   EthHashInfo,
-  FixedIcon,
-  Icon,
   Text,
-  Tooltip,
 } from '@gnosis.pm/safe-react-components'
 import { AccordionDetails, IconButton } from '@material-ui/core'
-import { memo, useState } from 'react'
+import { memo, MouseEventHandler, useState } from 'react'
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd'
 import styled from 'styled-components'
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
@@ -37,6 +35,7 @@ type TransactionProps = {
   removeTransaction?: (index: number) => void
   setTxIndexToRemove: (index: string) => void
   openDeleteTxModal: () => void
+  onTransactionConfirm?: (id: number) => void
 }
 
 const TransactionBatchListItem = memo(
@@ -51,12 +50,7 @@ const TransactionBatchListItem = memo(
     draggableTxIndexOrigin,
     reorderTransactions,
     networkPrefix,
-    replaceTransaction,
-    setTxIndexToEdit,
-    openEditTxModal,
-    removeTransaction,
-    setTxIndexToRemove,
-    openDeleteTxModal,
+    onTransactionConfirm,
   }: TransactionProps) => {
     const { description } = transaction
     const { to } = description
@@ -131,6 +125,20 @@ const TransactionBatchListItem = memo(
 
               {/* Transaction Actions */}
 
+              { onTransactionConfirm && (
+                <Button
+                  size="md"
+                  variant="bordered"
+                  color="secondary"
+                  onClick={(event: any) => {
+                    event.stopPropagation()
+                    onTransactionConfirm(transaction.id)
+                  }}
+                >
+                  Confirm
+                </Button>
+              )}
+
               {/* Edit transaction */}
               {/*{replaceTransaction && (*/}
               {/*  <Tooltip title="Edit transaction" backgroundColor="primary" textColor="white" arrow>*/}
@@ -172,26 +180,26 @@ const TransactionBatchListItem = memo(
               {/*)}*/}
 
               {/* Expand transaction details */}
-              {showTransactionDetails && (
-                <Tooltip
-                  placement="top"
-                  title="Expand transaction details"
-                  backgroundColor="primary"
-                  textColor="white"
-                  arrow
-                >
-                  <TransactionActionButton
-                    onClick={event => {
-                      event.stopPropagation()
-                      onClickShowTransactionDetails()
-                    }}
-                    size="medium"
-                    aria-label="Expand transaction details"
-                  >
-                    <FixedIcon type={'chevronDown'} />
-                  </TransactionActionButton>
-                </Tooltip>
-              )}
+              {/*{showTransactionDetails && (*/}
+              {/*  <Tooltip*/}
+              {/*    placement="top"*/}
+              {/*    title="Expand transaction details"*/}
+              {/*    backgroundColor="primary"*/}
+              {/*    textColor="white"*/}
+              {/*    arrow*/}
+              {/*  >*/}
+              {/*    <TransactionActionButton*/}
+              {/*      onClick={event => {*/}
+              {/*        event.stopPropagation()*/}
+              {/*        onClickShowTransactionDetails()*/}
+              {/*      }}*/}
+              {/*      size="medium"*/}
+              {/*      aria-label="Expand transaction details"*/}
+              {/*    >*/}
+              {/*      <FixedIcon type={'chevronDown'} />*/}
+              {/*    </TransactionActionButton>*/}
+              {/*  </Tooltip>*/}
+              {/*)}*/}
             </AccordionSummary>
           </div>
 

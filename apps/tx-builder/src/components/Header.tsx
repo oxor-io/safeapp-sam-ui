@@ -46,7 +46,7 @@ const Header = () => {
           ) }
         </StyledNav>
 
-        { (threshold && root) && (
+        { moduleEnabled && (
           <StyledDiv>
             <Text size="sm">
               Root:

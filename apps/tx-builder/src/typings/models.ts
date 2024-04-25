@@ -1,7 +1,9 @@
 export interface SamTransaction extends ProposedTransaction {
+  msgHash: string
   nonce: number
+  zkProofs: string[]
+  operation: number
   confirmed: boolean
-  proofs: string[]
 }
 
 export interface ProposedTransaction {

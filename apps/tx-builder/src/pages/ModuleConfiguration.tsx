@@ -4,6 +4,7 @@ import styled from 'styled-components'
 
 import { TextFieldInput } from '@gnosis.pm/safe-react-components'
 import { useSam } from '../store/samContext'
+import { soliditySha3, keccak256 } from 'web3-utils'
 
 const ModuleConfiguration: FC = () => {
   const {
@@ -14,7 +15,7 @@ const ModuleConfiguration: FC = () => {
     createModule,
     enableModule,
     disableModule,
-    changeListOfOwners,
+    changeRootWithOwners,
     changeThreshold,
   } = useSam()
 
@@ -22,18 +23,22 @@ const ModuleConfiguration: FC = () => {
   const [localThreshold, setLocalThreshold] = useState<number>(threshold)
 
   const onModuleCreate = async () => {
-    createModule()
+    const testRoot = '7378323513471991738332527896654445137493089583233093119951646841738120031371'
+    const testSalt = soliditySha3({
+      type: 'uint256',
+      value: keccak256('7777'),
+    }) as string
+
+    await createModule(testRoot, testSalt)
   }
 
-  const onModuleEnable = () => {
-    enableModule()
+  const onModuleEnable = async () => {
+    await enableModule()
   }
 
   const onModuleUpdate = () => {
-    // TODO: Add simple validation
-
     if (listOfOwners !== localListOfOwners) {
-      changeListOfOwners(localListOfOwners)
+      onListOfOwnersUpdate(localListOfOwners)
     }
 
     if (threshold !== localThreshold) {
@@ -41,8 +46,15 @@ const ModuleConfiguration: FC = () => {
     }
   }
 
-  const onModuleDisable = () => {
-    disableModule()
+  const onListOfOwnersUpdate = async (newListOfOwners: string) => {
+    // TODO: add calculateRoot method
+    const calculatedRoot = ''
+
+    await changeRootWithOwners(calculatedRoot, newListOfOwners)
+  }
+
+  const onModuleDisable = async () => {
+    await disableModule()
   }
 
   return (

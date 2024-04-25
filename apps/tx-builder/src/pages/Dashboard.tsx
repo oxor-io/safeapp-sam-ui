@@ -47,7 +47,7 @@ const Dashboard = (): ReactElement => {
 
   const { saveTransaction, removeTransaction, updateTransaction } = useTransaction()
   const { generateInputs } = useGenerateCircuitInputs()
-  const { proof, generateCircomProof } = useCircomProof()
+  const { zkProof, generateCircomProof } = useCircomProof()
 
   useEffect(() => {
     if (!abi || !interfaceRepo) {
@@ -210,7 +210,7 @@ const Dashboard = (): ReactElement => {
         </AddNewTransactionFormWrapper>
 
         <ZkProofWindow
-          proof={proof}
+          proof={zkProof}
           onSaveTransaction={onSaveTransaction}
         />
       </Grid>

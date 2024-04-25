@@ -35,7 +35,7 @@ export const useTransaction = () => {
     }
   }
 
-  const saveTransaction = async (transaction: ProposedTransaction) => {
+  const saveTransaction = async (transaction: SamTransaction) => {
     return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions`, {
       method: 'POST',
       headers: {
@@ -49,7 +49,7 @@ export const useTransaction = () => {
 
   const updateTransaction = async (transaction: Partial<ProposedTransaction>) => {
     return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions?id=eq.${transaction.id}`, {
-      method: 'UPDATE',
+      method: 'POST',
       headers: {
         "Content-Type": 'application/json',
         "apiKey": REACT_APP_SUPABASE_KEY ?? '',
