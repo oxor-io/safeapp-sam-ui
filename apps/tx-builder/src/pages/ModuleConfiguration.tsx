@@ -4,10 +4,9 @@ import styled from 'styled-components'
 
 import { TextFieldInput } from '@gnosis.pm/safe-react-components'
 import { useSam } from '../store/samContext'
+import { soliditySha3, keccak256 } from 'web3-utils'
 
 const ModuleConfiguration: FC = () => {
-  const [module, setModule] = useState(false)
-
   const {
     zkWalletAddress,
     threshold,
@@ -15,7 +14,8 @@ const ModuleConfiguration: FC = () => {
     moduleEnabled,
     createModule,
     enableModule,
-    changeListOfOwners,
+    disableModule,
+    changeRootWithOwners,
     changeThreshold,
   } = useSam()
 
@@ -23,22 +23,22 @@ const ModuleConfiguration: FC = () => {
   const [localThreshold, setLocalThreshold] = useState<number>(threshold)
 
   const onModuleCreate = async () => {
-    createModule()
+    const testRoot = '7378323513471991738332527896654445137493089583233093119951646841738120031371'
+    const testSalt = soliditySha3({
+      type: 'uint256',
+      value: keccak256('7777'),
+    }) as string
 
-    console.log("module created!")
-    //   TODO
-    setModule(true)
+    await createModule(testRoot, testSalt)
   }
 
-  const onModuleEnable = () => {
-    enableModule()
+  const onModuleEnable = async () => {
+    await enableModule()
   }
 
   const onModuleUpdate = () => {
-    // TODO: Add simple validation
-
     if (listOfOwners !== localListOfOwners) {
-      changeListOfOwners(localListOfOwners)
+      onListOfOwnersUpdate(localListOfOwners)
     }
 
     if (threshold !== localThreshold) {
@@ -46,14 +46,21 @@ const ModuleConfiguration: FC = () => {
     }
   }
 
-  const onModuleDisable = () => {
-    // TODO
+  const onListOfOwnersUpdate = async (newListOfOwners: string) => {
+    // TODO: add calculateRoot method
+    const calculatedRoot = ''
+
+    await changeRootWithOwners(calculatedRoot, newListOfOwners)
+  }
+
+  const onModuleDisable = async () => {
+    await disableModule()
   }
 
   return (
     <Wrapper>
       <StyledTitle size="lg">
-        {!module ? 'Create ' : 'Edit '}
+        {!zkWalletAddress ? 'Create ' : 'Edit '}
         ZK Wallet
       </StyledTitle>
 
@@ -76,18 +83,19 @@ const ModuleConfiguration: FC = () => {
         onChange={(event) => setLocalListOfOwners(event.target.value)}
       />
 
-      {module && (
+      {zkWalletAddress && (
         <TextFieldInput
-          style={{ marginTop: '1rem' }}
+          style={{ marginTop: '2rem' }}
           name="threshold"
           type="number"
           label="Threshold"
-          value={threshold}
+          value={localThreshold}
+          onChange={(event) => setLocalThreshold(Number(event.target.value))}
         />
       )}
 
       <ButtonContainer>
-        {!module ? (
+        {!zkWalletAddress ? (
           <Button
             onClick={onModuleCreate}
             size="lg"
@@ -117,6 +125,7 @@ const ModuleConfiguration: FC = () => {
               </Button>
 
               <Button
+                disabled
                 onClick={onModuleDisable}
                 size="md"
                 color="error"

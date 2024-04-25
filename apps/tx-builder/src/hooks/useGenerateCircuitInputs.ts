@@ -1,7 +1,7 @@
 import { Element } from 'fixed-merkle-tree'
 
 export interface GeneratorParameters {
-  privKey: string
+  privKey: Uint8Array
   participantAddresses: string[]
   msgHash: string
   treeHeight: number
@@ -19,7 +19,7 @@ export interface WitnessData {
 
 export const useGenerateCircuitInputs = () => {
   const generateInputs = async (params: GeneratorParameters): Promise<WitnessData> => {
-    // TODO: Provide generateDataCircom function from
+    // TODO: Provide generateDataCircom function here
     // const generatedInputs = ...
 
     // return generatedInputs

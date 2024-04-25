@@ -45,8 +45,12 @@ const AddNewTransactionForm = ({
         showHexEncodedData={showHexEncodedData}
       >
         <ButtonContainer>
-          {/* Add transaction btn */}
-          <Button size="md" color="secondary" type="submit">
+          <Button
+            fullWidth
+            size="md"
+            color="secondary"
+            type="submit"
+          >
             Generate Proof
           </Button>
         </ButtonContainer>
