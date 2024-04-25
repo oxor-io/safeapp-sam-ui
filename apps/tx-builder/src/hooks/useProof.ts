@@ -5,20 +5,20 @@ import { ProposedTransaction, SamTransaction } from '../typings/models'
 const REACT_APP_SUPABASE_URL = "https://snsoupmxxcbdyohaeeny.supabase.co"
 const REACT_APP_SUPABASE_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuc291cG14eGNiZHlvaGFlZW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTM4OTM2MzEsImV4cCI6MjAyOTQ2OTYzMX0.v8BGP1LFm1siAYXC7QYobH9bJ0y-tnzVMCqJkhOF4Eg"
 
-type TransactionParams = 'id' | 'contractInterface' | 'description' | 'raw' | 'nonce' | 'proofs' | 'confirmed' | 'address' | 'root'
-export const useDbInteraction = () => {
+type ProofsParams = 'id' | 'proofs' | 'root' | 'address'
+export const useProofs = () => {
   const [isLoading, setIsLoading] = useState(false)
-  const [transactions, setTransactions] = useState<SamTransaction[]>([])
+  const [proofs, setProofs] = useState<SamTransaction[]>([])
 
   useEffect(() => {
-    fetchTransactions()
+    fetchProofs()
   }, [])
 
-  const fetchTransactions = async () => {
+  const fetchProofs = async () => {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions`, {
+      const response = await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/proofs`, {
         method: 'GET',
         headers: {
           "Content-Type": 'application/json',
@@ -27,7 +27,7 @@ export const useDbInteraction = () => {
         },
       })
       const json = await response.json()
-      setTransactions(json)
+      setProofs(json)
     } catch (error) {
       console.log(error);
     } finally {
@@ -35,8 +35,8 @@ export const useDbInteraction = () => {
     }
   }
 
-  const saveTransaction = async (transaction: ProposedTransaction) => {
-    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions`, {
+  const saveProof = async (transaction: ProposedTransaction) => {
+    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/proofs`, {
       method: 'POST',
       headers: {
         "Content-Type": 'application/json',
@@ -47,8 +47,8 @@ export const useDbInteraction = () => {
     })
   }
 
-  const updateTransaction = async (transaction: Partial<ProposedTransaction>) => {
-    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions?id=eq.${transaction.id}`, {
+  const updateProof = async (transaction: Partial<ProposedTransaction>) => {
+    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/proofs?id=eq.${transaction.id}`, {
       method: 'UPDATE',
       headers: {
         "Content-Type": 'application/json',
@@ -59,8 +59,8 @@ export const useDbInteraction = () => {
     })
   }
 
-  const removeTransaction = async (transaction: Pick<ProposedTransaction, 'id'>) => {
-    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions?id=eq.${transaction.id}`, {
+  const removeProof = async (transaction: Pick<ProposedTransaction, 'id'>) => {
+    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/proofs?id=eq.${transaction.id}`, {
       method: 'DELETE',
       headers: {
         "Content-Type": 'application/json',
@@ -71,7 +71,7 @@ export const useDbInteraction = () => {
   }
 
 
-  const fetchTransactionByParam = async (param: TransactionParams, value: string) => {
+  const fetchProofByParam = async (param: ProofsParams, value: string) => {
     return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions?${param}=eq.${value}&select=*`, {
       method: 'GET',
       headers: {
@@ -83,11 +83,11 @@ export const useDbInteraction = () => {
   }
 
   return {
-    transactions,
+    proofs,
     isLoading,
-    get: {all: fetchTransactions, byParam: fetchTransactionByParam},
-    saveTransaction,
-    updateTransaction,
-    removeTransaction
+    get: {all: fetchProofs(), byParam: fetchProofByParam},
+    saveProof,
+    updateProof,
+    removeProof
   }
 }

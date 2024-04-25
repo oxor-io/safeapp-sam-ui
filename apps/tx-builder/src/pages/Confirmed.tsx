@@ -5,10 +5,10 @@ import {
 import styled from 'styled-components'
 import TransactionsBatchList from '../components/TransactionsBatchList'
 
-import { useDbInteraction } from '../hooks/useDbInteraction'
+import { useTransaction } from '../hooks/useTransaction'
 
 const Confirmed = () => {
-  const { transactions, isLoading} = useDbInteraction()
+  const { transactions, isLoading} = useTransaction()
   const confirmedTransactions = transactions.filter((transaction) => transaction.confirmed)
 
   return (

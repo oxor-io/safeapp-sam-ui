@@ -17,7 +17,7 @@ import SuccessBatchCreationModal from '../components/modals/SuccessBatchCreation
 import { useTransactionLibrary, useTransactions } from '../store'
 import { useSimulation } from '../hooks/useSimulation'
 import { FETCH_STATUS } from '../utils'
-import { useDbInteraction } from '../hooks/useDbInteraction'
+import { useTransaction } from '../hooks/useTransaction'
 
 const ReviewAndConfirm = () => {
   const {
@@ -60,7 +60,7 @@ const ReviewAndConfirm = () => {
     }
   }
 
-  const {isLoading, transactions} = useDbInteraction()
+  const {isLoading, transactions} = useTransaction()
 
   return (
     <>

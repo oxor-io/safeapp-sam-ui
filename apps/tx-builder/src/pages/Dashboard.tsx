@@ -13,7 +13,7 @@ import { ContractInterface } from '../typings/models'
 import { useNetwork } from '../store'
 import { useAbi } from '../hooks/useAbi'
 import { useCircomProof } from '../hooks/useCircomProof'
-import { useDbInteraction } from '../hooks/useDbInteraction'
+import { useTransaction } from '../hooks/useTransaction'
 import { useGenerateCircuitInputs } from '../hooks/useGenerateCircuitInputs'
 import { ImplementationABIDialog } from '../components/modals/ImplementationABIDialog'
 import ZkProofWindow from '../components/ZkProofWindow'
@@ -45,7 +45,7 @@ const Dashboard = (): ReactElement => {
   } = useNetwork()
   const navigate = useNavigate()
 
-  const { saveTransaction, removeTransaction, updateTransaction } = useDbInteraction()
+  const { saveTransaction, removeTransaction, updateTransaction } = useTransaction()
   const { generateInputs } = useGenerateCircuitInputs()
   const { proof, generateCircomProof } = useCircomProof()
 
