@@ -6,8 +6,6 @@ import { TextFieldInput } from '@gnosis.pm/safe-react-components'
 import { useSam } from '../store/samContext'
 
 const ModuleConfiguration: FC = () => {
-  const [module, setModule] = useState(false)
-
   const {
     zkWalletAddress,
     threshold,
@@ -15,6 +13,7 @@ const ModuleConfiguration: FC = () => {
     moduleEnabled,
     createModule,
     enableModule,
+    disableModule,
     changeListOfOwners,
     changeThreshold,
   } = useSam()
@@ -24,10 +23,6 @@ const ModuleConfiguration: FC = () => {
 
   const onModuleCreate = async () => {
     createModule()
-
-    console.log("module created!")
-    //   TODO
-    setModule(true)
   }
 
   const onModuleEnable = () => {
@@ -47,13 +42,13 @@ const ModuleConfiguration: FC = () => {
   }
 
   const onModuleDisable = () => {
-    // TODO
+    disableModule()
   }
 
   return (
     <Wrapper>
       <StyledTitle size="lg">
-        {!module ? 'Create ' : 'Edit '}
+        {!zkWalletAddress ? 'Create ' : 'Edit '}
         ZK Wallet
       </StyledTitle>
 
@@ -76,18 +71,19 @@ const ModuleConfiguration: FC = () => {
         onChange={(event) => setLocalListOfOwners(event.target.value)}
       />
 
-      {module && (
+      {zkWalletAddress && (
         <TextFieldInput
-          style={{ marginTop: '1rem' }}
+          style={{ marginTop: '2rem' }}
           name="threshold"
           type="number"
           label="Threshold"
-          value={threshold}
+          value={localThreshold}
+          onChange={(event) => setLocalThreshold(Number(event.target.value))}
         />
       )}
 
       <ButtonContainer>
-        {!module ? (
+        {!zkWalletAddress ? (
           <Button
             onClick={onModuleCreate}
             size="lg"
@@ -117,6 +113,7 @@ const ModuleConfiguration: FC = () => {
               </Button>
 
               <Button
+                disabled
                 onClick={onModuleDisable}
                 size="md"
                 color="error"

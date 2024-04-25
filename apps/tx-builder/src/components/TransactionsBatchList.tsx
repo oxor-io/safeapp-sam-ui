@@ -214,7 +214,7 @@ const TransactionsBatchList = ({
             <Droppable mode={'standard'} droppableId={TRANSACTION_LIST_DROPPABLE_ID}>
               {(provided: DroppableProvided) => (
                 <TransactionList {...provided.droppableProps} ref={provided.innerRef}>
-                  {transactions.map((transaction: any, index: number) => (
+                  {transactions.map((transaction, index: number) => (
                     <Draggable
                       key={transaction.id}
                       index={index}

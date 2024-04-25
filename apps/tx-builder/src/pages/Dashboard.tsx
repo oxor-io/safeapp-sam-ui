@@ -49,7 +49,6 @@ const Dashboard = (): ReactElement => {
   const { generateInputs } = useGenerateCircuitInputs()
   const { proof, generateCircomProof } = useCircomProof()
 
-
   useEffect(() => {
     if (!abi || !interfaceRepo) {
       setContract(null)
@@ -117,7 +116,6 @@ const Dashboard = (): ReactElement => {
       nativeCurrencySymbol,
       networkPrefix,
     )
-
     setProposedTransaction(newProposedTransaction)
 
     // TODO
