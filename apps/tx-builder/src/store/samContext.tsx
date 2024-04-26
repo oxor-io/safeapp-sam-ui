@@ -14,12 +14,16 @@ type SamContextProps = {
   threshold: number
   root: string
   moduleEnabled: boolean
-  createModule: (root: string, salt: string) => Promise<void>
+  createModule: (root: string, salt: string, listOfOwners: string) => Promise<void>
   enableModule: () => Promise<void>
   disableModule: () => Promise<void>
   changeRootWithOwners: (newRoot: string, newListOfOwners: string) => Promise<void>
-  changeThreshold: (newThreshold: number) => void
+  executeTransaction: (to: string, value: string, data: string, operation: number, proofs: any[]) => Promise<void>
   getNonce: () => Promise<any>
+}
+
+const txParams = {
+  safeTxGas: 1000000,
 }
 
 export const SamContext = createContext<SamContextProps | null>(null)
@@ -54,7 +58,7 @@ const SamProvider: FC = ({ children }) => {
     setSafeContract(initSafeContract)
   }, [web3, safe.safeAddress])
 
-  const createModule = async (root: string, salt: string) => {
+  const createModule = async (root: string, salt: string, listOfOwners: string) => {
     if (!web3 || !samContract || !safeProxyFactoryContract || !safeContract) {
       return
     }
@@ -75,9 +79,7 @@ const SamProvider: FC = ({ children }) => {
           data: createProxyData,
         },
       ],
-      params: {
-        safeTxGas: 1000000,
-      }
+      params: txParams,
     })
 
     // Await for Safe transaction to be CONFIRMED to get txHash
@@ -93,6 +95,7 @@ const SamProvider: FC = ({ children }) => {
     setZkWalletAddress(createdZkWalletAddress)
     setZkWalletContract(new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], createdZkWalletAddress))
     setRoot(root)
+    setListOfOwners(listOfOwners)
   }
 
   const waitForTransactionConfirmation = (safeTxHash: string): Promise<any | null> => {
@@ -125,9 +128,7 @@ const SamProvider: FC = ({ children }) => {
           data: enableModuleData,
         },
       ],
-      params: {
-        safeTxGas: 1000000,
-      }
+      params: txParams,
     })
 
     setModuleEnabled(true)
@@ -147,9 +148,7 @@ const SamProvider: FC = ({ children }) => {
           data: enableModuleData,
         },
       ],
-      params: {
-        safeTxGas: 1000000,
-      }
+      params: txParams,
     })
 
     setModuleEnabled(true)
@@ -201,6 +200,30 @@ const SamProvider: FC = ({ children }) => {
     })
   }
 
+  const executeTransaction = async (
+    to: string,
+    value: string,
+    data: string,
+    operation: number,
+    proofs: any[],
+  ) => {
+    if (!zkWalletContract) {
+      return
+    }
+
+    const executeTxData = zkWalletContract.methods.executeTransaction().encodeABI()
+    await sdk.txs.send({
+      txs: [
+        {
+          value: '0',
+          to: safe.safeAddress,
+          data: executeTxData,
+        },
+      ],
+      params: txParams,
+    })
+  }
+
   return (
     <SamContext.Provider
       value={{
@@ -212,8 +235,8 @@ const SamProvider: FC = ({ children }) => {
         createModule,
         enableModule,
         disableModule,
+        executeTransaction,
         changeRootWithOwners,
-        changeThreshold,
         getNonce,
       }}
     >

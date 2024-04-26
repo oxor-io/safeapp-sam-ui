@@ -24,14 +24,14 @@ const ModuleConfiguration: FC = () => {
   const onModuleCreate = async () => {
     const testSalt = soliditySha3({
       type: 'uint256',
-      value: keccak256('2222'),
+      value: keccak256('1111'),
     }) as string
 
     const owners = getArrayFromOwners()
 
     const { tree: {root} } = await generateTree(5, owners)
 
-    await createModule(root.toString(), testSalt)
+    await createModule(root.toString(), testSalt, localListOfOwners)
   }
 
   const onModuleEnable = async () => {
@@ -111,6 +111,7 @@ const ModuleConfiguration: FC = () => {
               <Button
                 onClick={onModuleUpdate}
                 size="md"
+                disabled={listOfOwners === localListOfOwners}
                 color="secondary"
                 variant="bordered"
               >
