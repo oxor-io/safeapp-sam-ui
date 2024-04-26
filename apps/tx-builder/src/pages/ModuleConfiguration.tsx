@@ -5,56 +5,53 @@ import styled from 'styled-components'
 import { TextFieldInput } from '@gnosis.pm/safe-react-components'
 import { useSam } from '../store/samContext'
 import { soliditySha3, keccak256 } from 'web3-utils'
+import { generateTree } from '../scripts/merkleTree'
+import { useNetwork } from '../store'
 
 const ModuleConfiguration: FC = () => {
   const {
     zkWalletAddress,
-    threshold,
     listOfOwners,
     moduleEnabled,
     createModule,
     enableModule,
     disableModule,
-    changeRootWithOwners,
-    changeThreshold,
+    fileSam,
   } = useSam()
+  const { safe} = useNetwork()
 
   const [localListOfOwners, setLocalListOfOwners] = useState<string>(listOfOwners)
-  const [localThreshold, setLocalThreshold] = useState<number>(threshold)
 
   const onModuleCreate = async () => {
-    const testRoot = '7378323513471991738332527896654445137493089583233093119951646841738120031371'
     const testSalt = soliditySha3({
       type: 'uint256',
-      value: keccak256('7777'),
+      value: keccak256(safe.chainId.toString()),
     }) as string
 
-    await createModule(testRoot, testSalt)
+    const owners = getArrayFromOwners()
+
+    const { tree: {root} } = await generateTree(5, owners)
+
+    await createModule(root.toString(), testSalt, localListOfOwners, owners.length)
   }
 
   const onModuleEnable = async () => {
     await enableModule()
   }
 
-  const onModuleUpdate = () => {
-    if (listOfOwners !== localListOfOwners) {
-      onListOfOwnersUpdate(localListOfOwners)
-    }
+  const onModuleUpdate = async () => {
+    const owners = getArrayFromOwners()
+    const { tree: {root} } = await generateTree(5, owners)
 
-    if (threshold !== localThreshold) {
-      changeThreshold(localThreshold)
-    }
-  }
-
-  const onListOfOwnersUpdate = async (newListOfOwners: string) => {
-    // TODO: add calculateRoot method
-    const calculatedRoot = ''
-
-    await changeRootWithOwners(calculatedRoot, newListOfOwners)
+    await fileSam(root.toString(), owners.length, localListOfOwners)
   }
 
   const onModuleDisable = async () => {
     await disableModule()
+  }
+
+  const getArrayFromOwners = (): string[] => {
+    return localListOfOwners.split(',').map((element) => element.trim())
   }
 
   return (
@@ -80,19 +77,9 @@ const ModuleConfiguration: FC = () => {
         minRows={7}
         value={localListOfOwners}
         variant="filled"
+        disabled={!moduleEnabled && !!zkWalletAddress}
         onChange={(event) => setLocalListOfOwners(event.target.value)}
       />
-
-      {zkWalletAddress && (
-        <TextFieldInput
-          style={{ marginTop: '2rem' }}
-          name="threshold"
-          type="number"
-          label="Threshold"
-          value={localThreshold}
-          onChange={(event) => setLocalThreshold(Number(event.target.value))}
-        />
-      )}
 
       <ButtonContainer>
         {!zkWalletAddress ? (
@@ -118,6 +105,7 @@ const ModuleConfiguration: FC = () => {
               <Button
                 onClick={onModuleUpdate}
                 size="md"
+                disabled={listOfOwners === localListOfOwners}
                 color="secondary"
                 variant="bordered"
               >
@@ -125,9 +113,9 @@ const ModuleConfiguration: FC = () => {
               </Button>
 
               <Button
-                disabled
                 onClick={onModuleDisable}
                 size="md"
+                disabled
                 color="error"
                 variant="bordered"
               >

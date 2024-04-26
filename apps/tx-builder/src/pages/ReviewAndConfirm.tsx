@@ -249,7 +249,7 @@ const SimulationContainer = styled(Card)`
 const Wrapper = styled.main`
   && {
     padding: 120px 48px 48px;
-    max-width: 650px;
+    max-width: 700px;
     margin: 0 auto;
   }
 `

@@ -1,10 +1,10 @@
 import { Element } from 'fixed-merkle-tree'
+import { generateDataCircom } from '../scripts/generateInput'
 
 export interface GeneratorParameters {
   privKey: Uint8Array
   participantAddresses: string[]
   msgHash: string
-  treeHeight: number
 }
 
 export interface WitnessData {
@@ -19,13 +19,11 @@ export interface WitnessData {
 
 export const useGenerateCircuitInputs = () => {
   const generateInputs = async (params: GeneratorParameters): Promise<WitnessData> => {
-    // TODO: Provide generateDataCircom function here
-    // const generatedInputs = ...
+    const { privKey, participantAddresses, msgHash} = params
 
-    // return generatedInputs
+    const generatedInputs = await generateDataCircom(privKey, participantAddresses, msgHash, 5)
 
-    // TODO: remove it, when upper TODO will be resolved
-    return null as any
+    return generatedInputs as WitnessData
   }
 
   return { generateInputs }
