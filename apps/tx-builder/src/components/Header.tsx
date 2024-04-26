@@ -43,7 +43,7 @@ const Header = () => {
           </StyledLink>
         </StyledNav>
 
-        { moduleEnabled && (
+        { (root && threshold) && (
           <StyledDiv>
             <Text size="sm">
               Root:

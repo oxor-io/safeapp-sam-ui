@@ -6,6 +6,7 @@ import { TextFieldInput } from '@gnosis.pm/safe-react-components'
 import { useSam } from '../store/samContext'
 import { soliditySha3, keccak256 } from 'web3-utils'
 import { generateTree } from '../scripts/merkleTree'
+import { useNetwork } from '../store'
 
 const ModuleConfiguration: FC = () => {
   const {
@@ -15,41 +16,34 @@ const ModuleConfiguration: FC = () => {
     createModule,
     enableModule,
     disableModule,
-    changeRootWithOwners,
-    getNonce,
+    fileSam,
   } = useSam()
+  const { safe} = useNetwork()
 
   const [localListOfOwners, setLocalListOfOwners] = useState<string>(listOfOwners)
 
   const onModuleCreate = async () => {
     const testSalt = soliditySha3({
       type: 'uint256',
-      value: keccak256('1111'),
+      value: keccak256(safe.chainId.toString()),
     }) as string
 
     const owners = getArrayFromOwners()
 
     const { tree: {root} } = await generateTree(5, owners)
 
-    await createModule(root.toString(), testSalt, localListOfOwners)
+    await createModule(root.toString(), testSalt, localListOfOwners, owners.length)
   }
 
   const onModuleEnable = async () => {
     await enableModule()
   }
 
-  const onModuleUpdate = () => {
-    // if (listOfOwners !== localListOfOwners) {
-    //   onListOfOwnersUpdate(localListOfOwners)
-    // }
-    console.log(getNonce())
-  }
+  const onModuleUpdate = async () => {
+    const owners = getArrayFromOwners()
+    const { tree: {root} } = await generateTree(5, owners)
 
-  const onListOfOwnersUpdate = async (newListOfOwners: string) => {
-    // TODO: add calculateRoot method
-    const calculatedRoot = ''
-
-    await changeRootWithOwners(calculatedRoot, newListOfOwners)
+    await fileSam(root.toString(), owners.length, localListOfOwners)
   }
 
   const onModuleDisable = async () => {
@@ -121,6 +115,7 @@ const ModuleConfiguration: FC = () => {
               <Button
                 onClick={onModuleDisable}
                 size="md"
+                disabled
                 color="error"
                 variant="bordered"
               >
