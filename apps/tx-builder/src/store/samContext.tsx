@@ -1,11 +1,12 @@
 import { FC, createContext, useContext, useEffect, useState } from 'react'
-import { AbiItem, utf8ToHex, toBN, toChecksumAddress } from 'web3-utils'
+import { AbiItem, utf8ToHex, toBN } from 'web3-utils'
 import { Contract } from 'web3-eth-contract'
 
 import { useNetwork } from './networkContext'
 import safeAnonymizationModule from '../contracts/SafeAnonymizationModule.json'
 import safeProxyFactory from '../contracts/SafeProxyFactory.json'
 import safeModule from '../contracts/Safe.json'
+import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 
 type SamContextProps = {
   zkWalletAddress: string | null
@@ -18,7 +19,7 @@ type SamContextProps = {
   disableModule: () => Promise<void>
   changeRootWithOwners: (newRoot: string, newListOfOwners: string) => Promise<void>
   changeThreshold: (newThreshold: number) => void
-  getNonce: () => void
+  getNonce: () => Promise<any>
 }
 
 export const SamContext = createContext<SamContextProps | null>(null)
@@ -79,13 +80,35 @@ const SamProvider: FC = ({ children }) => {
       }
     })
 
-    // FIXME: Check if previous logic is correct, now it seems that it's a random address
-    const createdZkWalletAddress = toChecksumAddress('0x' + createSamTx.safeTxHash.slice(-40))
+    // Await for Safe transaction to be CONFIRMED to get txHash
+    const safeTxDetails = await waitForTransactionConfirmation(createSamTx.safeTxHash)
+    if (!safeTxDetails) {
+      return
+    }
 
-    setRoot(root)
+    const txReceipt = await sdk.eth.getTransactionReceipt([safeTxDetails.txHash])
+
+    const createdZkWalletAddress = txReceipt.logs[1].address
+
     setZkWalletAddress(createdZkWalletAddress)
     setZkWalletContract(new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], createdZkWalletAddress))
+    setRoot(root)
   }
+
+  const waitForTransactionConfirmation = (safeTxHash: string): Promise<any | null> => {
+    return new Promise((resolve) => {
+      const interval = setInterval(async () => {
+        const safeTransaction = await sdk.txs.getBySafeTxHash(safeTxHash)
+        if (safeTransaction.txStatus === TransactionStatus.SUCCESS) {
+          clearInterval(interval)
+          resolve(safeTransaction)
+        } else if (safeTransaction.txStatus === TransactionStatus.FAILED) {
+          clearInterval(interval)
+          resolve(null)
+        }
+      }, 3000) // Check every 3 seconds
+    });
+  };
 
   const enableModule = async () => {
     if (!safeContract || !zkWalletAddress) {
@@ -115,8 +138,7 @@ const SamProvider: FC = ({ children }) => {
       return
     }
 
-    // FIXME: wrong arguments
-    const enableModuleData = safeContract.methods.disableModule(zkWalletAddress).encodeABI()
+    const enableModuleData = safeContract.methods.disableModule(zkWalletAddress, zkWalletAddress).encodeABI()
     await sdk.txs.send({
       txs: [
         {

@@ -129,7 +129,7 @@ const TransactionBatchListItem = memo(
                 <Button
                   size="md"
                   variant="bordered"
-                  color="secondary"
+                  color="primary"
                   onClick={(event: any) => {
                     event.stopPropagation()
                     onTransactionConfirm(transaction.id)
@@ -138,6 +138,18 @@ const TransactionBatchListItem = memo(
                   Confirm
                 </Button>
               )}
+
+              <Button
+                size="md"
+                variant="bordered"
+                color="secondary"
+                // onClick={(event: any) => {
+                //   event.stopPropagation()
+                //   onTransactionConfirm(transaction.id)
+                // }}
+              >
+                Check and Execute
+              </Button>
 
               {/* Edit transaction */}
               {/*{replaceTransaction && (*/}

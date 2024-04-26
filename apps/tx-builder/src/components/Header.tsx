@@ -24,26 +24,23 @@ const Header = () => {
               ZK Wallet
             </Text>
           </StyledLink>
-
           { moduleEnabled && (
-            <>
-              <StyledLink to={DASHBOARD_PATH}>
-                <Text size="xl">
-                  New
-                </Text>
-              </StyledLink>
-              <StyledLink to={REVIEW_AND_CONFIRM_PATH}>
-                <Text size="xl">
-                  Pending
-                </Text>
-              </StyledLink>
-              <StyledLink to={CONFIRMED_PATH}>
-                <Text size="xl">
-                  Confirmed
-                </Text>
-              </StyledLink>
-            </>
+            <StyledLink to={DASHBOARD_PATH}>
+              <Text size="xl">
+                New
+              </Text>
+            </StyledLink>
           ) }
+          <StyledLink to={REVIEW_AND_CONFIRM_PATH}>
+            <Text size="xl">
+              Pending
+            </Text>
+          </StyledLink>
+          <StyledLink to={CONFIRMED_PATH}>
+            <Text size="xl">
+              Confirmed
+            </Text>
+          </StyledLink>
         </StyledNav>
 
         { moduleEnabled && (
