@@ -1,13 +1,13 @@
 import {
-  Accordion,
+  Accordion, AccordionActions,
   AccordionSummary,
   Button,
   Dot,
   EthHashInfo,
-  Text,
+  Text, TextFieldInput,
 } from '@gnosis.pm/safe-react-components'
 import { AccordionDetails, IconButton } from '@material-ui/core'
-import { memo, MouseEventHandler, useState } from 'react'
+import { memo, useState } from 'react'
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd'
 import styled from 'styled-components'
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
@@ -58,6 +58,7 @@ const TransactionBatchListItem = memo(
     const transactionDescription = getTransactionText(description)
 
     const [isTxExpanded, setTxExpanded] = useState(false)
+    const [isConfiming, setIsConfirming] = useState(false)
 
     const onClickShowTransactionDetails = () => {
       if (showTransactionDetails) {
@@ -127,11 +128,15 @@ const TransactionBatchListItem = memo(
 
               { onTransactionConfirm && (
                 <Button
+                  style={{ fontSize: '12px', padding: '0 10px', width: '80px', marginRight: '10px', minWidth: 'initial' }}
                   size="md"
                   variant="bordered"
                   color="primary"
                   onClick={(event: any) => {
                     event.stopPropagation()
+
+                    setIsConfirming(true)
+                    setTxExpanded(true)
                     onTransactionConfirm(transaction.id)
                   }}
                 >
@@ -140,13 +145,14 @@ const TransactionBatchListItem = memo(
               )}
 
               <Button
+                style={{ fontSize: '12px', width: '100px', padding: '0 10px' }}
                 size="md"
                 variant="bordered"
                 color="secondary"
-                // onClick={(event: any) => {
-                //   event.stopPropagation()
-                //   onTransactionConfirm(transaction.id)
-                // }}
+                onClick={(event: any) => {
+                  event.stopPropagation()
+                  // onTransactionConfirm(transaction.id)
+                }}
               >
                 Check and Execute
               </Button>
@@ -214,6 +220,32 @@ const TransactionBatchListItem = memo(
               {/*)}*/}
             </AccordionSummary>
           </div>
+
+          { isConfiming && (
+            <AccordionActions>
+              <TextFieldInput
+                fullWidth
+                size="small"
+                name="asd"
+                label="Primary key"
+                style={{ minHeight: 'initial' }}
+              />
+              <Button
+                size="md"
+                color="secondary"
+                style={{ fontSize: '13px', padding: '0 10px' }}
+              >
+                Generate proof
+              </Button>
+              <Button
+                size="md"
+                color="primary"
+                style={{ fontSize: '13px', padding: '0 10px' }}
+              >
+                Save proof
+              </Button>
+            </AccordionActions>
+          ) }
 
           {/* Transaction details */}
           <AccordionDetails>

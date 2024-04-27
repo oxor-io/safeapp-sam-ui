@@ -1,5 +1,5 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react'
-import { AddressInput, Divider, Switch, Text, Title } from '@gnosis.pm/safe-react-components'
+import { AddressInput, Divider, Switch, Text, TextFieldInput, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
 import InputAdornment from '@material-ui/core/InputAdornment'
 import Grid from '@material-ui/core/Grid'
@@ -21,11 +21,15 @@ import { parseFormToProposedTransaction, SolidityFormValuesTypes } from '../comp
 import { useNavigate } from 'react-router-dom'
 import { ProposedTransaction } from '../typings/models'
 import { REVIEW_AND_CONFIRM_PATH } from '../routes/routes'
+import { useSam } from '../store/samContext'
+import { bigintToUint8ArrayBitwise } from '../scripts/common'
+import { addHexPrefix } from "ethereumjs-util"
 
 const Dashboard = (): ReactElement => {
   const [abiAddress, setAbiAddress] = useState('')
   const [transactionRecipientAddress, setTransactionRecipientAddress] = useState('')
   const [contract, setContract] = useState<ContractInterface | null>(null)
+  const [privateKey, setPrivateKey] = useState<string>('')
   const [showHexEncodedData, setShowHexEncodedData] = useState<boolean>(false)
   const [proposedTransaction, setProposedTransaction] = useState<ProposedTransaction | null>()
   const { abi, abiStatus, setAbi } = useAbi(abiAddress)
@@ -42,12 +46,17 @@ const Dashboard = (): ReactElement => {
     web3,
     chainInfo,
     nativeCurrencySymbol,
+    safe,
   } = useNetwork()
   const navigate = useNavigate()
 
-  const { saveTransaction, removeTransaction, updateTransaction } = useTransaction()
-  const { generateInputs } = useGenerateCircuitInputs()
-  const { zkProof, generateCircomProof } = useCircomProof()
+  const { saveTransaction } = useTransaction()
+  const { generateInputs, getMsgHash } = useGenerateCircuitInputs()
+  const { zkProof, generateCircomProof, isLoading } = useCircomProof()
+
+  const { zkWalletAddress, listOfOwners, getNonce, threshold } = useSam()
+
+  const [msgHash, setMsgHash] = useState<string>('')
 
   useEffect(() => {
     if (!abi || !interfaceRepo) {
@@ -110,6 +119,10 @@ const Dashboard = (): ReactElement => {
   )
 
   const onGenerateProof = async (values: SolidityFormValuesTypes) => {
+    if (!zkWalletAddress) {
+      return
+    }
+
     const newProposedTransaction = parseFormToProposedTransaction(
       values,
       contract,
@@ -118,13 +131,51 @@ const Dashboard = (): ReactElement => {
     )
     setProposedTransaction(newProposedTransaction)
 
-    // TODO
-    // const circomData = generateInputs()
-    // await generateCircomProof(circomData)
+    const {raw: {to, value, data}} = newProposedTransaction
+
+    const nonce = await getNonce()
+
+    const msgHash = getMsgHash(
+      to,
+      value,
+      data,
+      0,
+      nonce,
+      zkWalletAddress,
+      safe.chainId,
+    )
+
+    const privateKeyHex = addHexPrefix(privateKey)
+    const privateKeyUint8Array = bigintToUint8ArrayBitwise(BigInt(privateKeyHex))
+
+    const witness = await generateInputs({
+      participantAddresses: listOfOwners,
+      privKey: privateKeyUint8Array,
+      msgHash,
+    })
+
+    await generateCircomProof(witness)
+
+    setMsgHash(msgHash)
   }
 
-  const onSaveTransaction = () => {
-    // saveTransaction()
+  const onSaveTransaction = async () => {
+    if (!proposedTransaction || !zkWalletAddress || !zkProof) {
+      return
+    }
+
+    const nonce = await getNonce()
+
+    await saveTransaction({
+      ...proposedTransaction,
+      nonce,
+      msgHash,
+      address: zkWalletAddress,
+      proofs: [zkProof],
+      confirmed: false,
+      operation: 0,
+      threshold,
+    })
 
     navigate(REVIEW_AND_CONFIRM_PATH)
   }
@@ -196,6 +247,17 @@ const Dashboard = (): ReactElement => {
             </StyledMethodWarning>
           )}
 
+          <TextFieldInput
+            fullWidth
+            required
+            style={{ marginTop: '25px' }}
+            type="text"
+            value={privateKey}
+            onChange={(e) => setPrivateKey(e.target.value)}
+            name="private-key"
+            label="Private key"
+          />
+
           {showNewTransactionForm && (
             <>
               <StyledDivider/>
@@ -204,13 +266,15 @@ const Dashboard = (): ReactElement => {
                 to={transactionRecipientAddress}
                 showHexEncodedData={showHexEncodedData}
                 onSubmit={onGenerateProof}
+                submitButtonDisabled={isLoading}
               />
             </>
           )}
         </AddNewTransactionFormWrapper>
 
         <ZkProofWindow
-          proof={zkProof}
+          proof={zkProof ? JSON.stringify(zkProof) : ''}
+          isLoading={isLoading}
           onSaveTransaction={onSaveTransaction}
         />
       </Grid>

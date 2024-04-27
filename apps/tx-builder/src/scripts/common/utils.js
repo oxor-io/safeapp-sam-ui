@@ -31,3 +31,11 @@ export function prepareForSerialization(obj) {
 
   return obj;
 }
+
+export function jsonStringifyWithBigInt(object) {
+  return JSON.stringify(object, (key, value) =>
+    typeof value === 'bigint'
+      ? value.toString()
+      : value // return everything else unchanged
+  );
+}
