@@ -15,6 +15,7 @@ type AddNewTransactionFormProps = {
   to: string
   showHexEncodedData: boolean
   onSubmit: (values: SolidityFormValuesTypes) => void
+  submitButtonDisabled?: boolean
 }
 
 const AddNewTransactionForm = ({
@@ -22,6 +23,7 @@ const AddNewTransactionForm = ({
   to,
   showHexEncodedData,
   onSubmit,
+  submitButtonDisabled
 }: AddNewTransactionFormProps) => {
   const initialFormValues = {
     [TO_ADDRESS_FIELD_NAME]: isValidAddress(to) ? to : '',
@@ -50,6 +52,7 @@ const AddNewTransactionForm = ({
             size="md"
             color="secondary"
             type="submit"
+            disabled={submitButtonDisabled}
           >
             Generate Proof
           </Button>

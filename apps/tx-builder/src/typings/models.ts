@@ -1,7 +1,9 @@
+import { CircomProof } from '../hooks/useCircomProof'
+
 export interface SamTransaction extends ProposedTransaction {
   msgHash: string
   nonce: number
-  zkProofs: string[]
+  proofs: CircomProof[]
   operation: number
   confirmed: boolean
   address: string
