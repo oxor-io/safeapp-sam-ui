@@ -32,7 +32,7 @@ const ModuleConfiguration: FC = () => {
 
     const { tree: {root} } = await generateTree(5, owners)
 
-    await createModule(root.toString(), testSalt, localListOfOwners, owners.length)
+    await createModule(root.toString(), testSalt, localListOfOwners, owners.length, owners)
   }
 
   const onModuleEnable = async () => {

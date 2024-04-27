@@ -7,6 +7,7 @@ import safeAnonymizationModule from '../contracts/SafeAnonymizationModule.json'
 import safeProxyFactory from '../contracts/SafeProxyFactory.json'
 import safeModule from '../contracts/Safe.json'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
+import { useZkWallet } from '../hooks/useProof'
 
 type SamContextProps = {
   zkWalletAddress: string | null
@@ -14,7 +15,7 @@ type SamContextProps = {
   threshold: number
   root: string
   moduleEnabled: boolean
-  createModule: (root: string, salt: string, listOfOwners: string, initThreshold: number) => Promise<void>
+  createModule: (root: string, salt: string, listOfOwners: string, initThreshold: number, ownersArr: string[]) => Promise<void>
   enableModule: () => Promise<void>
   disableModule: () => Promise<void>
   executeTransaction: (to: string, value: string, data: string, operation: number, proofs: any[]) => Promise<void>
@@ -42,6 +43,8 @@ const SamProvider: FC = ({ children }) => {
 
   const { sdk, web3, safe } = useNetwork()
 
+  const { saveZkWallet } = useZkWallet()
+
   useEffect(() => {
     if (!web3) {
       return
@@ -58,7 +61,8 @@ const SamProvider: FC = ({ children }) => {
     setSafeContract(initSafeContract)
   }, [web3, safe.safeAddress])
 
-  const createModule = async (root: string, salt: string, listOfOwners: string, initThreshold: number) => {
+  // TODO: fix parameters amount
+  const createModule = async (root: string, salt: string, listOfOwners: string, initThreshold: number, ownersArr: string[]) => {
     if (!web3 || !samContract || !safeProxyFactoryContract || !safeContract) {
       return
     }
@@ -96,6 +100,12 @@ const SamProvider: FC = ({ children }) => {
     setRoot(root)
     setListOfOwners(listOfOwners)
     setThreshold(initThreshold)
+
+    await saveZkWallet({
+      owners: ownersArr,
+      root,
+      address: createdZkWalletAddress,
+    })
   }
 
   const waitForTransactionConfirmation = (safeTxHash: string): Promise<any | null> => {

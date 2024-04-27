@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { WitnessData } from './useGenerateCircuitInputs'
 
-const apiUrl = 'http://sam.oxor.io/prove'
+const apiUrl = 'https://sam.oxor.io/prove'
 
 export const useCircomProof = () => {
   const [zkProof, setZkProof] = useState<string>('')
@@ -24,6 +24,7 @@ export const useCircomProof = () => {
       setIsLoading(false)
     } catch (error) {
       setError(error as Error)
+      console.error(error)
       setIsLoading(false)
     }
   }

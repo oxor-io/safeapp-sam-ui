@@ -24,7 +24,7 @@ const Header = () => {
               ZK Wallet
             </Text>
           </StyledLink>
-          { moduleEnabled && (
+          { !moduleEnabled && (
             <StyledLink to={DASHBOARD_PATH}>
               <Text size="xl">
                 New

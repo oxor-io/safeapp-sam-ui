@@ -1,6 +1,6 @@
 import { FC } from 'react'
 
-import { Button, TextFieldInput, Title } from '@gnosis.pm/safe-react-components'
+import { Button, Text, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
 
 interface ComponentProps {
@@ -15,15 +15,11 @@ const ZkProofWindow: FC<ComponentProps> = ({proof, onSaveTransaction}) => {
         ZK Proof
       </StyledTitle>
 
-      <StyledTextFieldInput
-        name="proof"
-        label="Proof"
-        fullWidth
-        minRows={7}
-        value={proof}
-        variant="filled"
-        multiline
-      />
+      <StyledDiv>
+        <Text size='lg'>
+          {proof}
+        </Text>
+      </StyledDiv>
 
       <Button
         onClick={onSaveTransaction}
@@ -52,5 +48,12 @@ const StyledTitle = styled(Title)`
   margin-bottom: 0.5em;
 `
 
-const StyledTextFieldInput = styled(TextFieldInput)`
+const StyledDiv = styled.div`
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 200px;
+  padding: 10px;
+  background-color: #929292;
+  color: #000000;
+  border-radius: 8px;
 `

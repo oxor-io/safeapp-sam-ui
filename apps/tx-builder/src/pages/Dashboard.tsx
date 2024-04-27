@@ -1,5 +1,5 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react'
-import { AddressInput, Divider, Switch, Text, Title } from '@gnosis.pm/safe-react-components'
+import { AddressInput, Divider, Switch, Text, TextField, TextFieldInput, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
 import InputAdornment from '@material-ui/core/InputAdornment'
 import Grid from '@material-ui/core/Grid'
@@ -14,7 +14,7 @@ import { useNetwork } from '../store'
 import { useAbi } from '../hooks/useAbi'
 import { useCircomProof } from '../hooks/useCircomProof'
 import { useTransaction } from '../hooks/useTransaction'
-import { useGenerateCircuitInputs } from '../hooks/useGenerateCircuitInputs'
+import { useGenerateCircuitInputs, WitnessData } from '../hooks/useGenerateCircuitInputs'
 import { ImplementationABIDialog } from '../components/modals/ImplementationABIDialog'
 import ZkProofWindow from '../components/ZkProofWindow'
 import { parseFormToProposedTransaction, SolidityFormValuesTypes } from '../components/forms/SolidityForm'
@@ -26,6 +26,7 @@ const Dashboard = (): ReactElement => {
   const [abiAddress, setAbiAddress] = useState('')
   const [transactionRecipientAddress, setTransactionRecipientAddress] = useState('')
   const [contract, setContract] = useState<ContractInterface | null>(null)
+  const [privateKey, setPrivateKey] = useState<string>('')
   const [showHexEncodedData, setShowHexEncodedData] = useState<boolean>(false)
   const [proposedTransaction, setProposedTransaction] = useState<ProposedTransaction | null>()
   const { abi, abiStatus, setAbi } = useAbi(abiAddress)
@@ -47,7 +48,7 @@ const Dashboard = (): ReactElement => {
 
   const { saveTransaction, removeTransaction, updateTransaction } = useTransaction()
   const { generateInputs } = useGenerateCircuitInputs()
-  const { zkProof, generateCircomProof } = useCircomProof()
+  const { zkProof, generateCircomProof, isLoading } = useCircomProof()
 
   useEffect(() => {
     if (!abi || !interfaceRepo) {
@@ -117,6 +118,52 @@ const Dashboard = (): ReactElement => {
       networkPrefix,
     )
     setProposedTransaction(newProposedTransaction)
+
+    const witness: WitnessData = {
+      "root": "7378323513472991738372527896654445137493089583233093119951646841738120031371",
+      "pathElements": [
+      "9479145765164306604898661246306912585240247746526471519759854195178979516700",
+      "10821577188404079746999828440545293402557390793255312676266883079953085672921",
+      "10266675050323606453909836805900148358798034671050728166354968531595868722006",
+      "8575350884931261137867066738147375482425232494266355398216179294178508866708",
+      "18097266179879782427361438755277450939722755112152115227098348943187633376449"
+      ],
+      "pathIndices": [ 0, 0, 0, 0, 0 ],
+      "msgHash": [
+      "3824357094776532107",
+      "9862228419744377792",
+      "9936023898774552892",
+      "1175434750703219840"
+      ],
+      "pubKey": [
+      [
+      "1906500004718046581",
+      "9734560624431998397",
+      "8840109498736861078",
+      "9446391870127103306"
+      ],
+      [
+      "11484740855056378533",
+      "18069073250093961717",
+      "17506526050819047786",
+      "3839302312743495238"
+      ]
+      ],
+      "r": [
+      "7172061516677377732",
+      "10775169412356130873",
+      "7410888667223180419",
+      "11766794500794155490"
+      ],
+      "s": [
+      "6633852572993487515",
+      "3163981371610810274",
+      "16259418595119449128",
+      "8198346849702919726"
+      ]
+    }
+
+    await generateCircomProof(witness)
 
     // TODO
     // const circomData = generateInputs()
@@ -195,6 +242,17 @@ const Dashboard = (): ReactElement => {
               Contract ABI doesn't have any public methods.
             </StyledMethodWarning>
           )}
+
+          <TextFieldInput
+            fullWidth
+            required
+            style={{ marginTop: '25px' }}
+            type="text"
+            value={privateKey}
+            onChange={(e) => setPrivateKey(e.target.value)}
+            name="private-key"
+            label="Private key"
+          />
 
           {showNewTransactionForm && (
             <>
