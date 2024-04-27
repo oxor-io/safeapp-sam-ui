@@ -21,6 +21,8 @@ import { parseFormToProposedTransaction, SolidityFormValuesTypes } from '../comp
 import { useNavigate } from 'react-router-dom'
 import { ProposedTransaction } from '../typings/models'
 import { REVIEW_AND_CONFIRM_PATH } from '../routes/routes'
+import { useSam } from '../store/samContext'
+import {keccak256} from 'web3-utils'
 
 const Dashboard = (): ReactElement => {
   const [abiAddress, setAbiAddress] = useState('')
@@ -43,12 +45,15 @@ const Dashboard = (): ReactElement => {
     web3,
     chainInfo,
     nativeCurrencySymbol,
+    safe,
   } = useNetwork()
   const navigate = useNavigate()
 
   const { saveTransaction, removeTransaction, updateTransaction } = useTransaction()
-  const { generateInputs } = useGenerateCircuitInputs()
+  const { generateInputs, getMsgHash } = useGenerateCircuitInputs()
   const { zkProof, generateCircomProof, isLoading } = useCircomProof()
+
+  const { zkWalletAddress, listOfOwners, getNonce } = useSam()
 
   useEffect(() => {
     if (!abi || !interfaceRepo) {
@@ -111,6 +116,11 @@ const Dashboard = (): ReactElement => {
   )
 
   const onGenerateProof = async (values: SolidityFormValuesTypes) => {
+    if (!zkWalletAddress) {
+      return
+    }
+
+    const textEncoder = new TextEncoder()
     const newProposedTransaction = parseFormToProposedTransaction(
       values,
       contract,
@@ -119,55 +129,27 @@ const Dashboard = (): ReactElement => {
     )
     setProposedTransaction(newProposedTransaction)
 
-    const witness: WitnessData = {
-      "root": "7378323513472991738372527896654445137493089583233093119951646841738120031371",
-      "pathElements": [
-      "9479145765164306604898661246306912585240247746526471519759854195178979516700",
-      "10821577188404079746999828440545293402557390793255312676266883079953085672921",
-      "10266675050323606453909836805900148358798034671050728166354968531595868722006",
-      "8575350884931261137867066738147375482425232494266355398216179294178508866708",
-      "18097266179879782427361438755277450939722755112152115227098348943187633376449"
-      ],
-      "pathIndices": [ 0, 0, 0, 0, 0 ],
-      "msgHash": [
-      "3824357094776532107",
-      "9862228419744377792",
-      "9936023898774552892",
-      "1175434750703219840"
-      ],
-      "pubKey": [
-      [
-      "1906500004718046581",
-      "9734560624431998397",
-      "8840109498736861078",
-      "9446391870127103306"
-      ],
-      [
-      "11484740855056378533",
-      "18069073250093961717",
-      "17506526050819047786",
-      "3839302312743495238"
-      ]
-      ],
-      "r": [
-      "7172061516677377732",
-      "10775169412356130873",
-      "7410888667223180419",
-      "11766794500794155490"
-      ],
-      "s": [
-      "6633852572993487515",
-      "3163981371610810274",
-      "16259418595119449128",
-      "8198346849702919726"
-      ]
-    }
+    const {raw: {to, value, data}} = newProposedTransaction
+
+    const nonce = await getNonce()
+
+    const msgHash = getMsgHash(
+      to,
+      value,
+      data,
+      0,
+      nonce,
+      zkWalletAddress,
+      safe.chainId,
+    )
+
+    const witness = await generateInputs({
+      participantAddresses: listOfOwners,
+      privKey: textEncoder.encode(privateKey),
+      msgHash: msgHash,
+    })
 
     await generateCircomProof(witness)
-
-    // TODO
-    // const circomData = generateInputs()
-    // await generateCircomProof(circomData)
   }
 
   const onSaveTransaction = () => {

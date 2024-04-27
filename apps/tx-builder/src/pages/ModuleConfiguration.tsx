@@ -20,7 +20,7 @@ const ModuleConfiguration: FC = () => {
   } = useSam()
   const { safe} = useNetwork()
 
-  const [localListOfOwners, setLocalListOfOwners] = useState<string>(listOfOwners)
+  const [localListOfOwners, setLocalListOfOwners] = useState<string>(listOfOwners.join(', '))
 
   const onModuleCreate = async () => {
     const testSalt = soliditySha3({
@@ -43,7 +43,7 @@ const ModuleConfiguration: FC = () => {
     const owners = getArrayFromOwners()
     const { tree: {root} } = await generateTree(5, owners)
 
-    await fileSam(root.toString(), owners.length, localListOfOwners)
+    await fileSam(root.toString(), owners.length, owners)
   }
 
   const onModuleDisable = async () => {
@@ -105,7 +105,7 @@ const ModuleConfiguration: FC = () => {
               <Button
                 onClick={onModuleUpdate}
                 size="md"
-                disabled={listOfOwners === localListOfOwners}
+                disabled={listOfOwners.join(', ') === localListOfOwners}
                 color="secondary"
                 variant="bordered"
               >

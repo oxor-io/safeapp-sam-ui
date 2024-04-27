@@ -37,12 +37,12 @@ export const useGenerateCircuitInputs = () => {
     operation: number,
     nonce: number,
     samAddress: string,
-    chainId: string,
+    chainId: number,
   ) => {
-    const callDataHash = keccak256(data)
+    const callDataHash = keccak256(data) ?? '0x'
 
     return keccak256(web3!.eth.abi.encodeParameters(
-      ['address', 'uint256', 'bytes', 'ISafe.Operation', 'uint256', 'address', 'uint256'],
+      ['address', 'uint256', 'bytes', 'uint256', 'uint256', 'address', 'uint256'],
       [to, value, callDataHash, operation, nonce, samAddress, chainId]
     ))
   }

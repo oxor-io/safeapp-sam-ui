@@ -4,6 +4,8 @@ export interface SamTransaction extends ProposedTransaction {
   zkProofs: string[]
   operation: number
   confirmed: boolean
+  address: string
+  threshold: number
 }
 
 export interface ProposedTransaction {

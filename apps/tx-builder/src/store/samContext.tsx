@@ -11,7 +11,7 @@ import { useZkWallet } from '../hooks/useZkWallet'
 
 type SamContextProps = {
   zkWalletAddress: string | null
-  listOfOwners: string
+  listOfOwners: string[]
   threshold: number
   root: string
   moduleEnabled: boolean
@@ -19,7 +19,7 @@ type SamContextProps = {
   enableModule: () => Promise<void>
   disableModule: () => Promise<void>
   executeTransaction: (to: string, value: string, data: string, operation: number, proofs: any[]) => Promise<void>
-  fileSam: (newRoot: string, newThreshold: number, newListOfOwners: string) => Promise<void>
+  fileSam: (newRoot: string, newThreshold: number, newListOfOwners: string[]) => Promise<void>
   getNonce: () => Promise<number>
 }
 
@@ -35,7 +35,7 @@ const SamProvider: FC = ({ children }) => {
   const [safeContract, setSafeContract] = useState<Contract | null>(null)
   const [zkWalletContract, setZkWalletContract] = useState<Contract | null>(null)
 
-  const [listOfOwners, setListOfOwners] = useState('')
+  const [listOfOwners, setListOfOwners] = useState<string[]>([])
   const [zkWalletAddress, setZkWalletAddress] = useState<string | null>(null)
   const [root, setRoot] = useState<string>('')
   const [threshold, setThreshold] = useState<number>(1)
@@ -98,7 +98,7 @@ const SamProvider: FC = ({ children }) => {
     setZkWalletAddress(createdZkWalletAddress)
     setZkWalletContract(new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], createdZkWalletAddress))
     setRoot(root)
-    setListOfOwners(listOfOwners)
+    setListOfOwners(ownersArr)
     setThreshold(initThreshold)
 
     await saveZkWallet({
@@ -164,7 +164,7 @@ const SamProvider: FC = ({ children }) => {
     setModuleEnabled(false)
   }
 
-  const fileSam = async (newRoot: string, newThreshold: number, newListOfOwners: string) => {
+  const fileSam = async (newRoot: string, newThreshold: number, newListOfOwners: string[]) => {
     if (!zkWalletContract || !zkWalletAddress) {
       return
     }

@@ -66,4 +66,11 @@ const StyledDiv = styled.div`
   background-color: #929292;
   color: #000000;
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  p {
+    width: 100%;
+  }
 `
