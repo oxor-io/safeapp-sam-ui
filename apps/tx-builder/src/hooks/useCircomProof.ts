@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { WitnessData } from './useGenerateCircuitInputs'
 
-const apiUrl = 'https://sam.oxor.io/prove'
+const proveUrl = 'https://sam.oxor.io/prove'
 
 export const useCircomProof = () => {
   const [zkProof, setZkProof] = useState<string>('')
@@ -12,7 +12,7 @@ export const useCircomProof = () => {
     setIsLoading(true)
 
     try {
-      const response = await fetch(apiUrl, {
+      const response = await fetch(proveUrl, {
         method: 'POST',
         headers: {
           "Content-Type": 'application/json',
@@ -20,7 +20,7 @@ export const useCircomProof = () => {
         body: JSON.stringify(inputData),
       })
 
-      setZkProof(await response.json())
+      setZkProof(await response.text())
       setIsLoading(false)
     } catch (error) {
       setError(error as Error)

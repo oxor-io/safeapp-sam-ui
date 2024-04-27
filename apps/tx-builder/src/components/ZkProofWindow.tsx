@@ -1,14 +1,15 @@
 import { FC } from 'react'
 
-import { Button, Text, Title } from '@gnosis.pm/safe-react-components'
+import { Button, Loader, Text, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
 
 interface ComponentProps {
   proof: string
+  isLoading?: boolean
   onSaveTransaction: () => void
 }
 
-const ZkProofWindow: FC<ComponentProps> = ({proof, onSaveTransaction}) => {
+const ZkProofWindow: FC<ComponentProps> = ({proof, isLoading, onSaveTransaction}) => {
   return (
     <Wrapper>
       <StyledTitle size="lg">
@@ -16,9 +17,16 @@ const ZkProofWindow: FC<ComponentProps> = ({proof, onSaveTransaction}) => {
       </StyledTitle>
 
       <StyledDiv>
-        <Text size='lg'>
-          {proof}
-        </Text>
+        { !isLoading ? (
+          <Text size='lg'>
+            {proof}
+          </Text>
+        ) : (
+          <Loader
+            size="md"
+            color="white"
+          />
+        ) }
       </StyledDiv>
 
       <Button
@@ -41,6 +49,7 @@ export default ZkProofWindow
 const Wrapper = styled.div`
   padding: 2rem 1.5rem;
   flex: 1;
+  max-width: 44%;
 `
 
 const StyledTitle = styled(Title)`
@@ -49,6 +58,7 @@ const StyledTitle = styled(Title)`
 `
 
 const StyledDiv = styled.div`
+  word-wrap: break-word;
   width: 100%;
   box-sizing: border-box;
   min-height: 200px;

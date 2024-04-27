@@ -90,11 +90,11 @@ export const useZkWallet = () => {
   }
 
   return {
-    // zkWallets,
-    // isLoading,
-    // get: {all: fetchZkWallets(), byParam: fetchZkWalletByParam},
+    zkWallets,
+    isLoading,
+    get: {all: fetchZkWallets, byParam: fetchZkWalletByParam},
     saveZkWallet,
-    // updateZkWallet,
-    // removeZkWallet
+    updateZkWallet,
+    removeZkWallet
   }
 }

@@ -269,6 +269,7 @@ const Dashboard = (): ReactElement => {
 
         <ZkProofWindow
           proof={zkProof}
+          isLoading={isLoading}
           onSaveTransaction={onSaveTransaction}
         />
       </Grid>

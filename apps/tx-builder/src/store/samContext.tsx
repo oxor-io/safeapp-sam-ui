@@ -7,7 +7,7 @@ import safeAnonymizationModule from '../contracts/SafeAnonymizationModule.json'
 import safeProxyFactory from '../contracts/SafeProxyFactory.json'
 import safeModule from '../contracts/Safe.json'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
-import { useZkWallet } from '../hooks/useProof'
+import { useZkWallet } from '../hooks/useZkWallet'
 
 type SamContextProps = {
   zkWalletAddress: string | null
