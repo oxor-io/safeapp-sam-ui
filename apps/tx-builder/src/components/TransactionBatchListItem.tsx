@@ -129,7 +129,7 @@ const TransactionBatchListItem = memo(
     }
 
     const onExecute = async () => {
-      const {raw: {to, value, data}, operation, proofs} = transaction
+      const { raw: {to, value, data}, operation, proofs} = transaction
 
       await executeTransaction(
         transaction.address,
@@ -143,9 +143,9 @@ const TransactionBatchListItem = memo(
       )
 
       // TODO: dont forget to enable
-      await updateTransactionById(transaction.id, {
-        confirmed: true
-      })
+      // await updateTransactionById(transaction.id, {
+      //   confirmed: true
+      // })
     }
 
     return (

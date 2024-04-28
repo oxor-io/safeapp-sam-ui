@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 
-import { ProposedTransaction } from '../typings/models'
-
 const REACT_APP_SUPABASE_URL = "https://snsoupmxxcbdyohaeeny.supabase.co"
 const REACT_APP_SUPABASE_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuc291cG14eGNiZHlvaGFlZW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTM4OTM2MzEsImV4cCI6MjAyOTQ2OTYzMX0.v8BGP1LFm1siAYXC7QYobH9bJ0y-tnzVMCqJkhOF4Eg"
 
@@ -55,20 +53,20 @@ export const useZkWallet = () => {
     })
   }
 
-  const updateZkWallet = async (transaction: Partial<ZkWallet>) => {
-    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/zkWallets?id=eq.${transaction.id}`, {
-      method: 'UPDATE',
+  const updateZkWallet = async (address: string, data: Partial<Omit<ZkWallet, 'id'>>) => {
+    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/zkWallets?address=eq.${address}`, {
+      method: 'PATCH',
       headers: {
         "Content-Type": 'application/json',
         "apiKey": REACT_APP_SUPABASE_KEY ?? '',
         Authorization: `Bearer ${REACT_APP_SUPABASE_KEY ?? ''}`,
       },
-      body: JSON.stringify(transaction),
+      body: JSON.stringify(data),
     })
   }
 
   const removeZkWallet = async (address: string) => {
-    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/zkWallets?id=eq.${address}`, {
+    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/zkWallets?address=eq.${address}`, {
       method: 'DELETE',
       headers: {
         "Content-Type": 'application/json',

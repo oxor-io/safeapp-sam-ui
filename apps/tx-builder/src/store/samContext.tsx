@@ -1,5 +1,5 @@
 import { FC, createContext, useContext, useEffect, useState } from 'react'
-import { AbiItem, utf8ToHex, toBN, numberToHex } from 'web3-utils'
+import { AbiItem, utf8ToHex, toBN, numberToHex, padLeft } from 'web3-utils'
 import { Contract } from 'web3-eth-contract'
 
 import { useNetwork } from './networkContext'
@@ -10,7 +10,6 @@ import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 import { useZkWallet } from '../hooks/useZkWallet'
 import { CircomProof } from '../hooks/useCircomProof'
 import Web3 from 'web3'
-import { BigNumber } from 'bignumber.js'
 
 type SamContextProps = {
   zkWalletAddress: string | null
@@ -54,9 +53,13 @@ const SamProvider: FC = ({ children }) => {
 
   const { sdk, web3, safe } = useNetwork()
 
-  const { saveZkWallet, get, removeZkWallet } = useZkWallet()
+  const { saveZkWallet, get, removeZkWallet, updateZkWallet } = useZkWallet()
 
   useEffect(() => {
+    if (!web3) {
+      return
+    }
+
     get.byParam('safeWallet', safe.safeAddress)
       .then((res) => res.json())
       .then((walletArr) => {
@@ -71,8 +74,9 @@ const SamProvider: FC = ({ children }) => {
         setRoot(accountModule.root)
         setThreshold(accountModule.owners.length)
         setModuleEnabled(true)
+        setZkWalletContract(new web3!.eth.Contract(safeAnonymizationModule.abi as AbiItem[], accountModule.address))
       })
-  }, [])
+  }, [web3])
 
   useEffect(() => {
     if (!web3) {
@@ -198,6 +202,7 @@ const SamProvider: FC = ({ children }) => {
     setRoot('')
     setThreshold(null)
     setListOfOwners([])
+    setZkWalletContract(null)
   }
 
   const fileSam = async (newRoot: string, newThreshold: number, newListOfOwners: string[]) => {
@@ -231,6 +236,12 @@ const SamProvider: FC = ({ children }) => {
       params: txParams,
     })
 
+    // FIXME: doesnt update wallet row
+    await updateZkWallet(zkWalletAddress, {
+      root: newRoot,
+      owners: newListOfOwners
+    })
+
     setThreshold(newThreshold)
     setRoot(newRoot)
     setListOfOwners(newListOfOwners)
@@ -240,6 +251,10 @@ const SamProvider: FC = ({ children }) => {
     const nonce = Number(await zkWalletContract!.methods.getNonce().call({ from: safe.safeAddress }))
 
     return nonce
+  }
+
+  const bnStringToHexUint256 = (value: string): string => {
+    return padLeft(numberToHex(value), 64)
   }
 
   const executeTransaction = async (
@@ -270,13 +285,12 @@ const SamProvider: FC = ({ children }) => {
     */
     const proofsTuple = proofs.map((proof) => {
       return [
-        proof.pi_a.slice(0, 2).map((item) => numberToHex(new BigNumber(item) as any)),
-        proof.pi_b.slice(0, 2).map((item) => item.map((value) => numberToHex(new BigNumber(value) as any))),
-        proof.pi_c.slice(0, 2).map((item) => numberToHex(new BigNumber(item) as any)),
-        numberToHex(new BigNumber(proof.commit) as any),
+        proof.pi_a.slice(0, 2).map((item) => bnStringToHexUint256(item)),
+        proof.pi_b.slice(0, 2).map((item) => item.map((value) => bnStringToHexUint256(value))),
+        proof.pi_c.slice(0, 2).map((item) => bnStringToHexUint256(item)),
+        bnStringToHexUint256(proof.commit),
       ]
     })
-
 
     const executeTxData = samTxContract
       .methods
@@ -296,29 +310,28 @@ const SamProvider: FC = ({ children }) => {
 
     let externalWeb3 = new Web3(Web3.givenProvider)
 
-    const fromAccount = safe.owners[0]
-    const toAddress = samAddress
-    const amountToSend = '0'
-
     // Build the transaction object
     const transactionObject = {
-      from: fromAccount,
-      to: toAddress,
-      value: amountToSend,
+      from: safe.owners[0],
+      to: samAddress,
+      value: '0',
       data: executeTxData,
     }
 
-    // externalWeb3.eth.sendTransaction(transactionObject)
-    //   .on('transactionHash', (hash) => {
-    //     console.log('Transaction Hash:', hash);
-    //   })
-    //   .on('receipt', (receipt) => {
-    //     console.log('Transaction Receipt:', receipt);
-    //   })
-    //   .on('error', (error) => {
-    //     console.error('Transaction Error:', error);
-    //   })
-    //   .then(console.log)
+    externalWeb3.eth.sendTransaction(transactionObject)
+      .on('transactionHash', (hash) => {
+        console.log('Transaction Hash:', hash);
+      })
+      .on('receipt', (receipt) => {
+        console.log('Transaction Receipt:', receipt);
+      })
+      .on('error', (error) => {
+        console.error('Transaction Error:', error);
+        throw new Error(error.message)
+      })
+      .catch((error) => {
+        throw new Error(error.message)
+      })
   }
 
   return (

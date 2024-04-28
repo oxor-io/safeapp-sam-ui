@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   Loader,
   Title,
@@ -6,10 +7,32 @@ import styled from 'styled-components'
 import TransactionsBatchList from '../components/TransactionsBatchList'
 
 import { useTransaction } from '../hooks/useTransaction'
+import { useZkWallet } from '../hooks/useZkWallet'
+import { useNetwork } from '../store'
 
 const Confirmed = () => {
-  const { transactions, isLoading} = useTransaction()
+  const { transactions, isLoading, get} = useTransaction()
   const confirmedTransactions = transactions.filter((transaction) => transaction.confirmed)
+  const { zkWallets} = useZkWallet()
+  const { safe } = useNetwork()
+
+  useEffect(() => {
+    if (!zkWallets.length) {
+      return
+    }
+
+    const owner = safe.owners[0]
+
+    const zkWallet = zkWallets.find((wallet) => {
+      return wallet.owners.includes(owner)
+    })
+
+    if (!zkWallet) {
+      return
+    }
+
+    get.byParam('address', zkWallet.address).then()
+  }, [zkWallets, safe.owners])
 
   return (
     <Wrapper>
