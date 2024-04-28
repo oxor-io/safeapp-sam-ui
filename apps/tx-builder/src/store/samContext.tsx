@@ -1,5 +1,5 @@
 import { FC, createContext, useContext, useEffect, useState } from 'react'
-import { AbiItem, utf8ToHex, toBN } from 'web3-utils'
+import { AbiItem, utf8ToHex, toBN, numberToHex, padLeft } from 'web3-utils'
 import { Contract } from 'web3-eth-contract'
 
 import { useNetwork } from './networkContext'
@@ -8,19 +8,29 @@ import safeProxyFactory from '../contracts/SafeProxyFactory.json'
 import safeModule from '../contracts/Safe.json'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 import { useZkWallet } from '../hooks/useZkWallet'
+import { CircomProof } from '../hooks/useCircomProof'
+import Web3 from 'web3'
 
 type SamContextProps = {
   zkWalletAddress: string | null
   listOfOwners: string[]
-  threshold: number
+  threshold: number | null
   root: string
   moduleEnabled: boolean
   createModule: (root: string, salt: string, listOfOwners: string, initThreshold: number, ownersArr: string[]) => Promise<void>
   enableModule: () => Promise<void>
   disableModule: () => Promise<void>
-  executeTransaction: (to: string, value: string, data: string, operation: number, proofs: any[]) => Promise<void>
+  executeTransaction: (samAddress: string, executeTx: ExecuteTransaction) => Promise<void>
   fileSam: (newRoot: string, newThreshold: number, newListOfOwners: string[]) => Promise<void>
   getNonce: () => Promise<number>
+}
+
+interface ExecuteTransaction {
+  to: string
+  value: string
+  data: string
+  operation: number
+  proofs: CircomProof[]
 }
 
 const txParams = {
@@ -38,12 +48,35 @@ const SamProvider: FC = ({ children }) => {
   const [listOfOwners, setListOfOwners] = useState<string[]>([])
   const [zkWalletAddress, setZkWalletAddress] = useState<string | null>(null)
   const [root, setRoot] = useState<string>('')
-  const [threshold, setThreshold] = useState<number>(1)
+  const [threshold, setThreshold] = useState<number | null>(null)
   const [moduleEnabled, setModuleEnabled] = useState<boolean>(false)
 
   const { sdk, web3, safe } = useNetwork()
 
-  const { saveZkWallet } = useZkWallet()
+  const { saveZkWallet, get, removeZkWallet, updateZkWallet } = useZkWallet()
+
+  useEffect(() => {
+    if (!web3) {
+      return
+    }
+
+    get.byParam('safeWallet', safe.safeAddress)
+      .then((res) => res.json())
+      .then((walletArr) => {
+        if (walletArr.length === 0) {
+          return
+        }
+
+        const accountModule = walletArr[0]
+
+        setZkWalletAddress(accountModule.address)
+        setListOfOwners(accountModule.owners)
+        setRoot(accountModule.root)
+        setThreshold(accountModule.owners.length)
+        setModuleEnabled(true)
+        setZkWalletContract(new web3!.eth.Contract(safeAnonymizationModule.abi as AbiItem[], accountModule.address))
+      })
+  }, [web3])
 
   useEffect(() => {
     if (!web3) {
@@ -105,6 +138,7 @@ const SamProvider: FC = ({ children }) => {
       owners: ownersArr,
       root,
       address: createdZkWalletAddress,
+      safeWallet: safe.safeAddress,
     })
   }
 
@@ -161,7 +195,14 @@ const SamProvider: FC = ({ children }) => {
       params: txParams,
     })
 
+    await removeZkWallet(zkWalletAddress!)
+
     setModuleEnabled(false)
+    setZkWalletAddress('')
+    setRoot('')
+    setThreshold(null)
+    setListOfOwners([])
+    setZkWalletContract(null)
   }
 
   const fileSam = async (newRoot: string, newThreshold: number, newListOfOwners: string[]) => {
@@ -195,6 +236,12 @@ const SamProvider: FC = ({ children }) => {
       params: txParams,
     })
 
+    // FIXME: doesnt update wallet row
+    await updateZkWallet(zkWalletAddress, {
+      root: newRoot,
+      owners: newListOfOwners
+    })
+
     setThreshold(newThreshold)
     setRoot(newRoot)
     setListOfOwners(newListOfOwners)
@@ -206,28 +253,85 @@ const SamProvider: FC = ({ children }) => {
     return nonce
   }
 
+  const bnStringToHexUint256 = (value: string): string => {
+    return padLeft(numberToHex(value), 64)
+  }
+
   const executeTransaction = async (
-    to: string,
-    value: string,
-    data: string,
-    operation: number,
-    proofs: any[],
+    samAddress: string,
+    executeTx: ExecuteTransaction
   ) => {
-    if (!zkWalletContract) {
+    if (!web3) {
       return
     }
 
-    const executeTxData = zkWalletContract.methods.executeTransaction().encodeABI()
-    await sdk.txs.send({
-      txs: [
-        {
-          value: '0',
-          to: safe.safeAddress,
-          data: executeTxData,
-        },
-      ],
-      params: txParams,
+    const samTxContract = new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], samAddress)
+
+    const {
+      to,
+      value,
+      data,
+      operation,
+      proofs,
+    } = executeTx
+
+    /*
+      struct Proof {
+        uint256[2] _pA;
+        uint256[2][2] _pB;
+        uint256[2] _pC;
+        uint256 commit;
+      }
+    */
+    const proofsTuple = proofs.map((proof) => {
+      return [
+        proof.pi_a.slice(0, 2).map((item) => bnStringToHexUint256(item)),
+        proof.pi_b.slice(0, 2).map((item) => item.map((value) => bnStringToHexUint256(value))),
+        proof.pi_c.slice(0, 2).map((item) => bnStringToHexUint256(item)),
+        bnStringToHexUint256(proof.commit),
+      ]
     })
+
+    const executeTxData = samTxContract
+      .methods
+      .executeTransaction(to, value, data, operation, proofsTuple)
+      .encodeABI()
+
+    // await sdk.txs.send({
+    //   txs: [
+    //     {
+    //       value: '0',
+    //       to: samAddress,
+    //       data: executeTxData,
+    //     },
+    //   ],
+    //   params: txParams,
+    // })
+
+    let externalWeb3 = new Web3(Web3.givenProvider)
+
+    // Build the transaction object
+    const transactionObject = {
+      from: safe.owners[0],
+      to: samAddress,
+      value: '0',
+      data: executeTxData,
+    }
+
+    externalWeb3.eth.sendTransaction(transactionObject)
+      .on('transactionHash', (hash) => {
+        console.log('Transaction Hash:', hash);
+      })
+      .on('receipt', (receipt) => {
+        console.log('Transaction Receipt:', receipt);
+      })
+      .on('error', (error) => {
+        console.error('Transaction Error:', error);
+        throw new Error(error.message)
+      })
+      .catch((error) => {
+        throw new Error(error.message)
+      })
   }
 
   return (

@@ -42,18 +42,18 @@ const CreateTransactions = () => {
       <TransactionsSectionWrapper item xs={12} md={6}>
         {transactions.length > 0 ? (
           <>
-            <TransactionsBatchList
-              batchTitle={fileName ? <FileNameTitle filename={fileName} /> : 'Transactions Batch'}
-              transactions={transactions}
-              removeTransaction={removeTransaction}
-              saveBatch={saveBatch}
-              downloadBatch={downloadBatch}
-              removeAllTransactions={removeAllTransactions}
-              replaceTransaction={replaceTransaction}
-              reorderTransactions={reorderTransactions}
-              showTransactionDetails={false}
-              showBatchHeader
-            />
+            {/*<TransactionsBatchList*/}
+            {/*  batchTitle={fileName ? <FileNameTitle filename={fileName} /> : 'Transactions Batch'}*/}
+            {/*  transactions={transactions}*/}
+            {/*  removeTransaction={removeTransaction}*/}
+            {/*  saveBatch={saveBatch}*/}
+            {/*  downloadBatch={downloadBatch}*/}
+            {/*  removeAllTransactions={removeAllTransactions}*/}
+            {/*  replaceTransaction={replaceTransaction}*/}
+            {/*  reorderTransactions={reorderTransactions}*/}
+            {/*  showTransactionDetails={false}*/}
+            {/*  showBatchHeader*/}
+            {/*/>*/}
             {/* Go to Review Screen button */}
             <Button
               size="md"

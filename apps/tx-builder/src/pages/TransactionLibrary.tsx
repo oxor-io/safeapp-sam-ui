@@ -169,14 +169,14 @@ const TransactionLibrary = () => {
                 </Tooltip>
               </BatchButtonsContainer>
             </StyledAccordionSummary>
-            <AccordionDetails>
-              {/* transactions batch list  */}
-              <TransactionsBatchList
-                transactions={batch.transactions}
-                showTransactionDetails
-                showBatchHeader={false}
-              />
-            </AccordionDetails>
+            {/*<AccordionDetails>*/}
+            {/*  /!* transactions batch list  *!/*/}
+            {/*  <TransactionsBatchList*/}
+            {/*    transactions={batch.transactions}*/}
+            {/*    showTransactionDetails*/}
+            {/*    showBatchHeader={false}*/}
+            {/*  />*/}
+            {/*</AccordionDetails>*/}
           </StyledAccordion>
         ))
       ) : (

@@ -46,7 +46,6 @@ const Dashboard = (): ReactElement => {
     web3,
     chainInfo,
     nativeCurrencySymbol,
-    safe,
   } = useNetwork()
   const navigate = useNavigate()
 
@@ -135,14 +134,13 @@ const Dashboard = (): ReactElement => {
 
     const nonce = await getNonce()
 
-    const msgHash = getMsgHash(
+    const msgHash = await getMsgHash(
       to,
       value,
       data,
       0,
       nonce,
       zkWalletAddress,
-      safe.chainId,
     )
 
     const privateKeyHex = addHexPrefix(privateKey)
@@ -174,7 +172,7 @@ const Dashboard = (): ReactElement => {
       proofs: [zkProof],
       confirmed: false,
       operation: 0,
-      threshold,
+      threshold: threshold!,
     })
 
     navigate(REVIEW_AND_CONFIRM_PATH)
@@ -266,7 +264,7 @@ const Dashboard = (): ReactElement => {
                 to={transactionRecipientAddress}
                 showHexEncodedData={showHexEncodedData}
                 onSubmit={onGenerateProof}
-                submitButtonDisabled={isLoading}
+                submitButtonDisabled={isLoading || !privateKey}
               />
             </>
           )}
@@ -278,26 +276,6 @@ const Dashboard = (): ReactElement => {
           onSaveTransaction={onSaveTransaction}
         />
       </Grid>
-
-      {implementationABIDialog.open && (
-        <ImplementationABIDialog
-          networkPrefix={networkPrefix}
-          blockExplorerLink={evalTemplate(chainInfo.blockExplorerUriTemplate.address, {
-            address: implementationABIDialog.implementationAddress,
-          })}
-          implementationAddress={implementationABIDialog.implementationAddress}
-          onCancel={() => {
-            setAbiAddress(implementationABIDialog.proxyAddress)
-            setTransactionRecipientAddress(implementationABIDialog.proxyAddress)
-            setImplementationABIDialog({ open: false, implementationAddress: '', proxyAddress: '' })
-          }}
-          onConfirm={() => {
-            setAbiAddress(implementationABIDialog.implementationAddress)
-            setTransactionRecipientAddress(implementationABIDialog.proxyAddress)
-            setImplementationABIDialog({ open: false, implementationAddress: '', proxyAddress: '' })
-          }}
-        />
-      )}
     </Wrapper>
   )
 }

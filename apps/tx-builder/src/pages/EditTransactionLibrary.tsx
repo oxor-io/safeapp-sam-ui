@@ -32,27 +32,27 @@ const EditTransactionLibrary = () => {
 
   return (
     <TransactionsSectionWrapper item xs={12} md={6}>
-      <TransactionsBatchList
-        transactions={transactions}
-        batchTitle={
-          batch && (
-            <EditableLabel
-              key={batch.name}
-              onEdit={newBatchName => renameBatch(batch.id, newBatchName)}
-            >
-              {batch.name}
-            </EditableLabel>
-          )
-        }
-        removeTransaction={removeTransaction}
-        saveBatch={saveBatch}
-        downloadBatch={downloadBatch}
-        removeAllTransactions={removeAllTransactions}
-        replaceTransaction={replaceTransaction}
-        reorderTransactions={reorderTransactions}
-        showTransactionDetails={false}
-        showBatchHeader
-      />
+      {/*<TransactionsBatchList*/}
+      {/*  transactions={transactions}*/}
+      {/*  batchTitle={*/}
+      {/*    batch && (*/}
+      {/*      <EditableLabel*/}
+      {/*        key={batch.name}*/}
+      {/*        onEdit={newBatchName => renameBatch(batch.id, newBatchName)}*/}
+      {/*      >*/}
+      {/*        {batch.name}*/}
+      {/*      </EditableLabel>*/}
+      {/*    )*/}
+      {/*  }*/}
+      {/*  removeTransaction={removeTransaction}*/}
+      {/*  saveBatch={saveBatch}*/}
+      {/*  downloadBatch={downloadBatch}*/}
+      {/*  removeAllTransactions={removeAllTransactions}*/}
+      {/*  replaceTransaction={replaceTransaction}*/}
+      {/*  reorderTransactions={reorderTransactions}*/}
+      {/*  showTransactionDetails={false}*/}
+      {/*  showBatchHeader*/}
+      {/*/>*/}
       {/* Save Batch and redirect to Transaction library */}
       {batch && batchId && (
         <Button

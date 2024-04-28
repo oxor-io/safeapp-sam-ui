@@ -1,30 +1,39 @@
 import {
-  Accordion, AccordionActions,
+  Accordion,
   AccordionSummary,
   Button,
   Dot,
   EthHashInfo,
-  Text, TextFieldInput,
+  Loader,
+  Text,
+  TextFieldInput,
 } from '@gnosis.pm/safe-react-components'
-import { AccordionDetails, IconButton } from '@material-ui/core'
+import { AccordionDetails } from '@material-ui/core'
 import { memo, useState } from 'react'
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd'
 import styled from 'styled-components'
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
-import { ProposedTransaction } from '../typings/models'
+import { ProposedTransaction, SamTransaction } from '../typings/models'
 import TransactionDetails from './TransactionDetails'
 import { getTransactionText } from '../utils'
+import { useCircomProof } from '../hooks/useCircomProof'
+import { useGenerateCircuitInputs } from '../hooks/useGenerateCircuitInputs'
+import { bigintToUint8ArrayBitwise } from '../scripts/common'
+import { addHexPrefix } from "ethereumjs-util"
+import { useTransaction } from '../hooks/useTransaction'
+import { ZkWallet } from '../hooks/useZkWallet'
+import { useSam } from '../store/samContext'
 
 const UNKNOWN_POSITION_LABEL = '?'
 const minArrowSize = '12'
 
 type TransactionProps = {
-  transaction: ProposedTransaction
+  transaction: SamTransaction
   provided: DraggableProvided
   snapshot: DraggableStateSnapshot
   isLastTransaction: boolean
   showTransactionDetails: boolean
   index: number
+  zkWallet?: ZkWallet
   draggableTxIndexDestination: number | undefined
   draggableTxIndexOrigin: number | undefined
   reorderTransactions?: (sourceIndex: number, destinationIndex: number) => void
@@ -35,7 +44,6 @@ type TransactionProps = {
   removeTransaction?: (index: number) => void
   setTxIndexToRemove: (index: string) => void
   openDeleteTxModal: () => void
-  onTransactionConfirm?: (id: number) => void
 }
 
 const TransactionBatchListItem = memo(
@@ -46,11 +54,11 @@ const TransactionBatchListItem = memo(
     isLastTransaction,
     showTransactionDetails,
     index,
+    zkWallet,
     draggableTxIndexDestination,
     draggableTxIndexOrigin,
     reorderTransactions,
     networkPrefix,
-    onTransactionConfirm,
   }: TransactionProps) => {
     const { description } = transaction
     const { to } = description
@@ -58,7 +66,9 @@ const TransactionBatchListItem = memo(
     const transactionDescription = getTransactionText(description)
 
     const [isTxExpanded, setTxExpanded] = useState(false)
-    const [isConfiming, setIsConfirming] = useState(false)
+    const [isConfirming, setIsConfirming] = useState(false)
+
+    const [privateKey, setPrivateKey] = useState('')
 
     const onClickShowTransactionDetails = () => {
       if (showTransactionDetails) {
@@ -76,6 +86,67 @@ const TransactionBatchListItem = memo(
       draggableTxIndexDestination,
       draggableTxIndexOrigin,
     )
+
+    const { zkProof, isLoading, generateCircomProof } = useCircomProof()
+    const { generateInputs } = useGenerateCircuitInputs()
+    const { updateTransactionById } = useTransaction()
+    const { executeTransaction } = useSam()
+
+    const onConfirm = async () => {
+      if (!!zkProof) {
+        await updateTransactionById(
+          transaction.id,
+          {
+            proofs: [
+              ...transaction.proofs,
+              zkProof,
+            ]
+          }
+        )
+
+        return
+      }
+
+      setIsConfirming(!isConfirming)
+      setTxExpanded(true)
+    }
+
+    const onGenerateProof = async () => {
+      if (!zkWallet) {
+        return
+      }
+
+      const privateKeyHex = addHexPrefix(privateKey)
+      const privateKeyUint8Array = bigintToUint8ArrayBitwise(BigInt(privateKeyHex))
+
+      const witness = await generateInputs({
+        participantAddresses: zkWallet.owners,
+        privKey: privateKeyUint8Array,
+        msgHash: transaction.msgHash,
+      })
+
+      await generateCircomProof(witness)
+    }
+
+    const onExecute = async () => {
+      const { raw: {to, value, data}, operation, proofs} = transaction
+
+      await executeTransaction(
+        transaction.address,
+        {
+          to,
+          value,
+          data,
+          operation,
+          proofs,
+        }
+      )
+
+      // TODO: dont forget to enable
+      // await updateTransactionById(transaction.id, {
+      //   confirmed: true
+      // })
+    }
 
     return (
       <TransactionListItem ref={provided.innerRef} {...provided.draggableProps}>
@@ -100,152 +171,93 @@ const TransactionBatchListItem = memo(
               expandIcon={false}
               style={{ cursor: reorderTransactions ? 'grab' : 'pointer' }}
             >
-              {/* Drag & Drop Indicator */}
-              {/*{reorderTransactions && (*/}
-              {/*  <Tooltip*/}
-              {/*    placement="top"*/}
-              {/*    title="Drag and Drop"*/}
-              {/*    backgroundColor="primary"*/}
-              {/*    textColor="white"*/}
-              {/*    arrow*/}
-              {/*  >*/}
-              {/*    <DragAndDropIndicatorIcon fontSize="small" />*/}
-              {/*  </Tooltip>*/}
-              {/*)}*/}
+              { !isConfirming ? (
+                <>
+                  {/* Destination Address label */}
+                  <EthHashInfo
+                    shortName={networkPrefix || ''}
+                    hash={to}
+                    shortenHash={4}
+                    shouldShowShortName
+                  />
 
-              {/* Destination Address label */}
-              <EthHashInfo
-                shortName={networkPrefix || ''}
-                hash={to}
-                shortenHash={4}
-                shouldShowShortName
-              />
+                  {/* Transaction Description label */}
+                  <TransactionsDescription size="lg">{transactionDescription}</TransactionsDescription>
+                </>
+              ) : (
+                <>
+                  <TextFieldInput
+                    fullWidth
+                    size="small"
+                    name="private-key"
+                    label="Private key"
+                    style={{ minHeight: 'initial', marginRight: '10px' }}
+                    value={privateKey}
+                    onChange={(e) => setPrivateKey(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div style={{width: '30px', height: '34px', flexShrink: 0}}>
+                    {isLoading && (
+                      <Loader
+                        color="secondary"
+                        size="sm"
+                      />
+                    )}
+                  </div>
+                  <Button
+                    onClick={async (e) => {
+                      e.stopPropagation()
 
-              {/* Transaction Description label */}
-              <TransactionsDescription size="lg">{transactionDescription}</TransactionsDescription>
+                      await onGenerateProof()
+                    }}
+                    size="md"
+                    color="secondary"
+                    disabled={isLoading}
+                    style={{ fontSize: '12px', padding: '0 10px', width: '150px', margin: '0 10px', minWidth: 'initial' }}
+                  >
+                    Generate proof
+                  </Button>
+                </>
+              )}
 
               {/* Transaction Actions */}
 
-              { onTransactionConfirm && (
-                <Button
-                  style={{ fontSize: '12px', padding: '0 10px', width: '80px', marginRight: '10px', minWidth: 'initial' }}
-                  size="md"
-                  variant="bordered"
-                  color="primary"
-                  onClick={(event: any) => {
-                    event.stopPropagation()
+              {!transaction.confirmed && (
+                <>
+                  <Button
+                    style={{ fontSize: '12px', padding: '0 10px', width: '80px', marginRight: '10px', minWidth: 'initial' }}
+                    size="md"
+                    variant="bordered"
+                    color="primary"
+                    disabled={isLoading}
+                    onClick={async (event: any) => {
+                      event.stopPropagation()
 
-                    setIsConfirming(true)
-                    setTxExpanded(true)
-                    onTransactionConfirm(transaction.id)
-                  }}
-                >
-                  Confirm
-                </Button>
+                      await onConfirm()
+                    }}
+                  >
+                    Confirm
+                  </Button>
+
+                  {!isConfirming && (
+                    <Button
+                      style={{ fontSize: '12px', minWidth: '80px', padding: '0 10px' }}
+                      size="md"
+                      variant="bordered"
+                      color="secondary"
+                      disabled={transaction.proofs.length < transaction.threshold}
+                      onClick={async (event: any) => {
+                        event.stopPropagation()
+                        await onExecute()
+                      }}
+                    >
+                      Execute
+                    </Button>
+                  )}
+                </>
               )}
-
-              <Button
-                style={{ fontSize: '12px', width: '100px', padding: '0 10px' }}
-                size="md"
-                variant="bordered"
-                color="secondary"
-                onClick={(event: any) => {
-                  event.stopPropagation()
-                  // onTransactionConfirm(transaction.id)
-                }}
-              >
-                Check and Execute
-              </Button>
-
-              {/* Edit transaction */}
-              {/*{replaceTransaction && (*/}
-              {/*  <Tooltip title="Edit transaction" backgroundColor="primary" textColor="white" arrow>*/}
-              {/*    <TransactionActionButton*/}
-              {/*      size="medium"*/}
-              {/*      aria-label="Edit transaction"*/}
-              {/*      onClick={event => {*/}
-              {/*        event.stopPropagation()*/}
-              {/*        setTxIndexToEdit(String(index))*/}
-              {/*        openEditTxModal()*/}
-              {/*      }}*/}
-              {/*    >*/}
-              {/*      <Icon size="sm" type="edit" />*/}
-              {/*    </TransactionActionButton>*/}
-              {/*  </Tooltip>*/}
-              {/*)}*/}
-
-              {/* Delete transaction */}
-              {/*{removeTransaction && (*/}
-              {/*  <Tooltip*/}
-              {/*    placement="top"*/}
-              {/*    title="Delete transaction"*/}
-              {/*    backgroundColor="primary"*/}
-              {/*    textColor="white"*/}
-              {/*    arrow*/}
-              {/*  >*/}
-              {/*    <TransactionActionButton*/}
-              {/*      onClick={event => {*/}
-              {/*        event.stopPropagation()*/}
-              {/*        setTxIndexToRemove(String(index))*/}
-              {/*        openDeleteTxModal()*/}
-              {/*      }}*/}
-              {/*      size="medium"*/}
-              {/*      aria-label="Delete transaction"*/}
-              {/*    >*/}
-              {/*      <Icon size="sm" type="delete" />*/}
-              {/*    </TransactionActionButton>*/}
-              {/*  </Tooltip>*/}
-              {/*)}*/}
-
-              {/* Expand transaction details */}
-              {/*{showTransactionDetails && (*/}
-              {/*  <Tooltip*/}
-              {/*    placement="top"*/}
-              {/*    title="Expand transaction details"*/}
-              {/*    backgroundColor="primary"*/}
-              {/*    textColor="white"*/}
-              {/*    arrow*/}
-              {/*  >*/}
-              {/*    <TransactionActionButton*/}
-              {/*      onClick={event => {*/}
-              {/*        event.stopPropagation()*/}
-              {/*        onClickShowTransactionDetails()*/}
-              {/*      }}*/}
-              {/*      size="medium"*/}
-              {/*      aria-label="Expand transaction details"*/}
-              {/*    >*/}
-              {/*      <FixedIcon type={'chevronDown'} />*/}
-              {/*    </TransactionActionButton>*/}
-              {/*  </Tooltip>*/}
-              {/*)}*/}
             </AccordionSummary>
           </div>
-
-          { isConfiming && (
-            <AccordionActions>
-              <TextFieldInput
-                fullWidth
-                size="small"
-                name="asd"
-                label="Primary key"
-                style={{ minHeight: 'initial' }}
-              />
-              <Button
-                size="md"
-                color="secondary"
-                style={{ fontSize: '13px', padding: '0 10px' }}
-              >
-                Generate proof
-              </Button>
-              <Button
-                size="md"
-                color="primary"
-                style={{ fontSize: '13px', padding: '0 10px' }}
-              >
-                Save proof
-              </Button>
-            </AccordionActions>
-          ) }
 
           {/* Transaction details */}
           <AccordionDetails>
@@ -383,12 +395,6 @@ const StyledAccordion = styled(Accordion).withConfig({
   }
 `
 
-const TransactionActionButton = styled(IconButton)`
-  height: 32px;
-  width: 32px;
-  padding: 0;
-`
-
 const TransactionsDescription = styled(Text)`
   flex-grow: 1;
   padding-left: 24px;
@@ -396,11 +402,6 @@ const TransactionsDescription = styled(Text)`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-`
-
-const DragAndDropIndicatorIcon = styled(DragIndicatorIcon)`
-  color: #b2bbc0;
-  margin-right: 4px;
 `
 
 export default TransactionBatchListItem
