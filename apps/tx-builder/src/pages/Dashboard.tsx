@@ -266,7 +266,7 @@ const Dashboard = (): ReactElement => {
                 to={transactionRecipientAddress}
                 showHexEncodedData={showHexEncodedData}
                 onSubmit={onGenerateProof}
-                submitButtonDisabled={isLoading}
+                submitButtonDisabled={isLoading || !privateKey}
               />
             </>
           )}

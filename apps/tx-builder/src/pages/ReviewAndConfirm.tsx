@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ButtonLink,
   Card,
@@ -14,10 +14,11 @@ import DeleteBatchModal from '../components/modals/DeleteBatchModal'
 import TransactionsBatchList from '../components/TransactionsBatchList'
 import useModal from '../hooks/useModal/useModal'
 import SuccessBatchCreationModal from '../components/modals/SuccessBatchCreationModal'
-import { useTransactionLibrary, useTransactions } from '../store'
+import { useNetwork, useTransactionLibrary, useTransactions } from '../store'
 import { useSimulation } from '../hooks/useSimulation'
 import { FETCH_STATUS } from '../utils'
 import { useTransaction } from '../hooks/useTransaction'
+import { useZkWallet, ZkWallet } from '../hooks/useZkWallet'
 
 const ReviewAndConfirm = () => {
   const {
@@ -60,7 +61,30 @@ const ReviewAndConfirm = () => {
     }
   }
 
-  const {isLoading, transactions} = useTransaction()
+  const { safe } = useNetwork()
+  const { zkWallets} = useZkWallet()
+  const { isLoading, transactions, get} = useTransaction()
+
+  const [zkWallet, setZkWallet] = useState<ZkWallet | undefined>(undefined)
+
+  useEffect(() => {
+    if (!zkWallets.length) {
+      return
+    }
+
+    const owner = safe.owners[0]
+
+    const zkWallet = zkWallets.find((wallet) => {
+      return wallet.owners.includes(owner)
+    })
+    setZkWallet(zkWallet)
+
+    if (!zkWallet) {
+      return
+    }
+
+    get.byParam('address', zkWallet.address).then()
+  }, [zkWallets, safe.owners])
 
   return (
     <>
@@ -74,6 +98,7 @@ const ReviewAndConfirm = () => {
               transactions={transactions}
               showTransactionDetails
               showBatchHeader
+              zkWallet={zkWallet}
               onTransactionConfirm={(id) => console.log('Approve transaction with id:', id)}
             />
           ) : (
@@ -249,7 +274,7 @@ const SimulationContainer = styled(Card)`
 const Wrapper = styled.main`
   && {
     padding: 120px 48px 48px;
-    max-width: 700px;
+    max-width: 750px;
     margin: 0 auto;
   }
 `

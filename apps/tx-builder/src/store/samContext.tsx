@@ -8,6 +8,7 @@ import safeProxyFactory from '../contracts/SafeProxyFactory.json'
 import safeModule from '../contracts/Safe.json'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 import { useZkWallet } from '../hooks/useZkWallet'
+import { CircomProof } from '../hooks/useCircomProof'
 
 type SamContextProps = {
   zkWalletAddress: string | null
@@ -18,9 +19,17 @@ type SamContextProps = {
   createModule: (root: string, salt: string, listOfOwners: string, initThreshold: number, ownersArr: string[]) => Promise<void>
   enableModule: () => Promise<void>
   disableModule: () => Promise<void>
-  executeTransaction: (to: string, value: string, data: string, operation: number, proofs: any[]) => Promise<void>
+  executeTransaction: (samAddress: string, executeTx: ExecuteTransaction) => Promise<void>
   fileSam: (newRoot: string, newThreshold: number, newListOfOwners: string[]) => Promise<void>
   getNonce: () => Promise<number>
+}
+
+interface ExecuteTransaction {
+  to: string
+  value: string
+  data: string
+  operation: number
+  proofs: CircomProof[]
 }
 
 const txParams = {
@@ -207,22 +216,32 @@ const SamProvider: FC = ({ children }) => {
   }
 
   const executeTransaction = async (
-    to: string,
-    value: string,
-    data: string,
-    operation: number,
-    proofs: any[],
+    samAddress: string,
+    executeTx: ExecuteTransaction
   ) => {
-    if (!zkWalletContract) {
+    if (!web3) {
       return
     }
 
-    const executeTxData = zkWalletContract.methods.executeTransaction().encodeABI()
+    const samTxContract = new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], samAddress)
+
+    const {
+      to,
+      value,
+      data,
+      operation,
+      proofs,
+    } = executeTx
+
+    const executeTxData = samTxContract
+      .methods
+      .executeTransaction(to, value, data, operation, proofs)
+      .encodeABI()
     await sdk.txs.send({
       txs: [
         {
           value: '0',
-          to: safe.safeAddress,
+          to: samAddress,
           data: executeTxData,
         },
       ],

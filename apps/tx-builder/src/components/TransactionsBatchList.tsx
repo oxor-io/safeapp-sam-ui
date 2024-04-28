@@ -1,5 +1,5 @@
 import { isValidElement, useMemo, useState } from 'react'
-import { Dot, Text, Title, Icon, Tooltip } from '@gnosis.pm/safe-react-components'
+import { Dot, Title } from '@gnosis.pm/safe-react-components'
 
 import IconButton from '@material-ui/core/IconButton'
 import styled from 'styled-components'
@@ -14,7 +14,7 @@ import {
   DraggableProvided,
   DraggableStateSnapshot,
 } from 'react-beautiful-dnd'
-import { ProposedTransaction } from '../typings/models'
+import { ProposedTransaction, SamTransaction } from '../typings/models'
 import useModal from '../hooks/useModal/useModal'
 import DeleteTransactionModal from './modals/DeleteTransactionModal'
 import DeleteBatchModal from './modals/DeleteBatchModal'
@@ -25,11 +25,13 @@ import Item from './TransactionBatchListItem'
 import VirtualizedList from './VirtualizedList'
 import { getTransactionText } from '../utils'
 import { EditableLabelProps } from './EditableLabel'
+import { ZkWallet } from '../hooks/useZkWallet'
 
 type TransactionsBatchListProps = {
-  transactions: ProposedTransaction[]
+  transactions: SamTransaction[]
   showTransactionDetails: boolean
   showBatchHeader: boolean
+  zkWallet?: ZkWallet
   // batch title has multiple types because there are files passing it as a string
   // or 2 types of components:
   // 1: apps/tx-builder/src/pages/EditTransactionLibrary.tsx
@@ -59,10 +61,9 @@ const TransactionsBatchList = ({
   saveBatch,
   showTransactionDetails,
   batchTitle,
-  onTransactionConfirm
+  onTransactionConfirm,
+  zkWallet,
 }: TransactionsBatchListProps) => {
-  // we need those states to display the correct position in each tx during the drag & drop
-  const { batch } = useTransactionLibrary()
   const [draggableTxIndexOrigin, setDraggableTxIndexOrigin] = useState<number>()
   const [draggableTxIndexDestination, setDraggableTxIndexDestination] = useState<number>()
 
@@ -205,7 +206,6 @@ const TransactionsBatchList = ({
         {/*)}*/}
 
         {/* Standard Transactions List */}
-        {transactions.length <= 20 && (
           <DragDropContext
             onDragStart={onDragStart}
             onDragUpdate={onDragUpdate}
@@ -224,6 +224,7 @@ const TransactionsBatchList = ({
                       {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                         <Item
                           key={transaction.id}
+                          zkWallet={zkWallet}
                           transaction={transaction}
                           provided={provided}
                           snapshot={snapshot}
@@ -250,86 +251,6 @@ const TransactionsBatchList = ({
               )}
             </Droppable>
           </DragDropContext>
-        )}
-
-        {/* Virtualized Transaction List */}
-        {transactions.length > 20 && (
-          <DragDropContext
-            onDragStart={onDragStart}
-            onDragUpdate={onDragUpdate}
-            onDragEnd={onDragEnd}
-          >
-            <Droppable
-              mode={'virtual'}
-              droppableId={TRANSACTION_LIST_DROPPABLE_ID}
-              renderClone={(
-                provided: DraggableProvided,
-                snapshot: DraggableStateSnapshot,
-                rubric,
-              ) => (
-                <Item
-                  key={transactions[rubric.source.index].id}
-                  transaction={transactions[rubric.source.index]}
-                  provided={provided}
-                  snapshot={snapshot}
-                  isLastTransaction={rubric.source.index === transactions.length - 1}
-                  showTransactionDetails={showTransactionDetails}
-                  index={rubric.source.index}
-                  draggableTxIndexDestination={draggableTxIndexDestination}
-                  draggableTxIndexOrigin={draggableTxIndexOrigin}
-                  reorderTransactions={reorderTransactions}
-                  networkPrefix={networkPrefix}
-                  replaceTransaction={replaceTransaction}
-                  setTxIndexToEdit={setTxIndexToEdit}
-                  openEditTxModal={openEditTxModal}
-                  removeTransaction={removeTransaction}
-                  setTxIndexToRemove={setTxIndexToRemove}
-                  openDeleteTxModal={openDeleteTxModal}
-                />
-              )}
-            >
-              {(provided: DroppableProvided) => (
-                <TransactionList {...provided.droppableProps} ref={provided.innerRef}>
-                  <VirtualizedList
-                    innerRef={provided.innerRef}
-                    items={transactions}
-                    renderItem={(transaction: any, index: number) => (
-                      <Draggable
-                        key={transaction.id}
-                        index={index}
-                        draggableId={transaction.id.toString()}
-                        isDragDisabled={!reorderTransactions}
-                      >
-                        {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
-                          <Item
-                            key={transaction.id}
-                            transaction={transaction}
-                            provided={provided}
-                            snapshot={snapshot}
-                            isLastTransaction={index === transactions.length - 1}
-                            showTransactionDetails={showTransactionDetails}
-                            index={index}
-                            draggableTxIndexDestination={draggableTxIndexDestination}
-                            draggableTxIndexOrigin={draggableTxIndexOrigin}
-                            reorderTransactions={reorderTransactions}
-                            networkPrefix={networkPrefix}
-                            replaceTransaction={replaceTransaction}
-                            setTxIndexToEdit={setTxIndexToEdit}
-                            openEditTxModal={openEditTxModal}
-                            removeTransaction={removeTransaction}
-                            setTxIndexToRemove={setTxIndexToRemove}
-                            openDeleteTxModal={openDeleteTxModal}
-                          />
-                        )}
-                      </Draggable>
-                    )}
-                  />
-                  {transactions.length <= 20 && provided.placeholder}
-                </TransactionList>
-              )}
-            </Droppable>
-          </DragDropContext>
-        )}
       </TransactionsBatchWrapper>
 
       {/* Edit transaction modal */}
