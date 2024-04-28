@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import useElementHeight from '../hooks/useElementHeight/useElementHeight'
-import { ProposedTransaction } from '../typings/models'
+import { SamTransaction } from '../typings/models'
 import { weiToEther } from '../utils'
 
 type TransactionDetailsProp = {
-  transaction: ProposedTransaction
+  transaction: SamTransaction
 }
 
 const TransactionDetails = ({ transaction }: TransactionDetailsProp) => {
@@ -67,6 +67,15 @@ const TransactionDetails = ({ transaction }: TransactionDetailsProp) => {
           data:
         </Text>
         <TxValueLabel>{data}</TxValueLabel>
+
+        <Text size="xl" color='secondaryHover'>
+          proofs:
+        </Text>
+        <TxValueLabel>
+          {transaction.proofs.length}
+          {' of '}
+          {transaction.threshold}
+        </TxValueLabel>
 
         {isContractInteractionTx && (
           <>

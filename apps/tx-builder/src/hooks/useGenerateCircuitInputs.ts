@@ -1,7 +1,8 @@
 import { Element } from 'fixed-merkle-tree'
-import { keccak256 } from 'web3-utils'
 import { generateDataCircom } from '../scripts/generateInput'
 import { useNetwork } from '../store'
+import { AbiItem } from 'web3-utils'
+import safeAnonymizationModule from '../contracts/SafeAnonymizationModule.json'
 
 export interface GeneratorParameters {
   privKey: Uint8Array
@@ -20,7 +21,7 @@ export interface WitnessData {
 }
 
 export const useGenerateCircuitInputs = () => {
-  const { web3 } = useNetwork()
+  const { web3, safe } = useNetwork()
 
   const generateInputs = async (params: GeneratorParameters): Promise<WitnessData> => {
     const { privKey, participantAddresses, msgHash} = params
@@ -30,24 +31,24 @@ export const useGenerateCircuitInputs = () => {
     return generatedInputs as WitnessData
   }
 
-  const getMsgHash = (
+  const getMsgHash = async (
     to: string,
     value: string,
     data: string,
     operation: number,
     nonce: number,
     samAddress: string,
-    chainId: number,
   ) => {
-    // keccak256 returns null if value = '0x'
-    const callDataHash = keccak256(data) ?? '0x'
+    if (!web3) {
+      return
+    }
 
-    return keccak256(web3!.eth.abi.encodeParameters(
-      ['address', 'uint256', 'bytes', 'uint256', 'uint256', 'address', 'uint256'],
-      [to, value, callDataHash, operation, nonce, samAddress, chainId]
-    ))
+    const samContract = new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], samAddress)
+
+    const msgHash = await samContract.methods.getMessageHash(to, value, data, operation, nonce).call({ from: safe.safeAddress })
+
+    return msgHash
   }
-
 
   return { generateInputs, getMsgHash }
 }

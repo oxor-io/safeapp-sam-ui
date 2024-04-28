@@ -3,8 +3,10 @@ import {
   AccordionSummary,
   Button,
   Dot,
-  EthHashInfo, Loader,
-  Text, TextFieldInput,
+  EthHashInfo,
+  Loader,
+  Text,
+  TextFieldInput,
 } from '@gnosis.pm/safe-react-components'
 import { AccordionDetails, IconButton } from '@material-ui/core'
 import { memo, useState } from 'react'
@@ -103,7 +105,6 @@ const TransactionBatchListItem = memo(
       const privateKeyUint8Array = bigintToUint8ArrayBitwise(BigInt(privateKeyHex))
 
       const witness = await generateInputs({
-        // TODO: PROVIDE FROM ZK WALLET
         participantAddresses: zkWallet.owners,
         privKey: privateKeyUint8Array,
         msgHash: transaction.msgHash,
@@ -253,68 +254,6 @@ const TransactionBatchListItem = memo(
                   )}
                 </>
               )}
-
-              {/* Edit transaction */}
-              {/*{replaceTransaction && (*/}
-              {/*  <Tooltip title="Edit transaction" backgroundColor="primary" textColor="white" arrow>*/}
-              {/*    <TransactionActionButton*/}
-              {/*      size="medium"*/}
-              {/*      aria-label="Edit transaction"*/}
-              {/*      onClick={event => {*/}
-              {/*        event.stopPropagation()*/}
-              {/*        setTxIndexToEdit(String(index))*/}
-              {/*        openEditTxModal()*/}
-              {/*      }}*/}
-              {/*    >*/}
-              {/*      <Icon size="sm" type="edit" />*/}
-              {/*    </TransactionActionButton>*/}
-              {/*  </Tooltip>*/}
-              {/*)}*/}
-
-              {/* Delete transaction */}
-              {/*{removeTransaction && (*/}
-              {/*  <Tooltip*/}
-              {/*    placement="top"*/}
-              {/*    title="Delete transaction"*/}
-              {/*    backgroundColor="primary"*/}
-              {/*    textColor="white"*/}
-              {/*    arrow*/}
-              {/*  >*/}
-              {/*    <TransactionActionButton*/}
-              {/*      onClick={event => {*/}
-              {/*        event.stopPropagation()*/}
-              {/*        setTxIndexToRemove(String(index))*/}
-              {/*        openDeleteTxModal()*/}
-              {/*      }}*/}
-              {/*      size="medium"*/}
-              {/*      aria-label="Delete transaction"*/}
-              {/*    >*/}
-              {/*      <Icon size="sm" type="delete" />*/}
-              {/*    </TransactionActionButton>*/}
-              {/*  </Tooltip>*/}
-              {/*)}*/}
-
-              {/* Expand transaction details */}
-              {/*{showTransactionDetails && (*/}
-              {/*  <Tooltip*/}
-              {/*    placement="top"*/}
-              {/*    title="Expand transaction details"*/}
-              {/*    backgroundColor="primary"*/}
-              {/*    textColor="white"*/}
-              {/*    arrow*/}
-              {/*  >*/}
-              {/*    <TransactionActionButton*/}
-              {/*      onClick={event => {*/}
-              {/*        event.stopPropagation()*/}
-              {/*        onClickShowTransactionDetails()*/}
-              {/*      }}*/}
-              {/*      size="medium"*/}
-              {/*      aria-label="Expand transaction details"*/}
-              {/*    >*/}
-              {/*      <FixedIcon type={'chevronDown'} />*/}
-              {/*    </TransactionActionButton>*/}
-              {/*  </Tooltip>*/}
-              {/*)}*/}
             </AccordionSummary>
           </div>
 

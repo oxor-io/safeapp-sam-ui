@@ -1,5 +1,5 @@
 import { FC, createContext, useContext, useEffect, useState } from 'react'
-import { AbiItem, utf8ToHex, toBN } from 'web3-utils'
+import { AbiItem, utf8ToHex, toBN, numberToHex, toHex } from 'web3-utils'
 import { Contract } from 'web3-eth-contract'
 
 import { useNetwork } from './networkContext'
@@ -9,6 +9,8 @@ import safeModule from '../contracts/Safe.json'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 import { useZkWallet } from '../hooks/useZkWallet'
 import { CircomProof } from '../hooks/useCircomProof'
+import Web3 from 'web3'
+import { BigNumber } from 'bignumber.js'
 
 type SamContextProps = {
   zkWalletAddress: string | null
@@ -233,20 +235,65 @@ const SamProvider: FC = ({ children }) => {
       proofs,
     } = executeTx
 
+    /*
+      struct Proof {
+        uint256[2] _pA;
+        uint256[2][2] _pB;
+        uint256[2] _pC;
+        uint256 commit;
+      }
+    */
+    const proofsTuple = proofs.map((proof) => {
+      return [
+        proof.pi_a.slice(0, 2).map((item) => numberToHex(new BigNumber(item) as any)),
+        proof.pi_b.slice(0, 2).map((item) => item.map((value) => numberToHex(new BigNumber(value) as any))),
+        proof.pi_c.slice(0, 2).map((item) => numberToHex(new BigNumber(item) as any)),
+        numberToHex(new BigNumber(proof.commit) as any),
+      ]
+    })
+
+
     const executeTxData = samTxContract
       .methods
-      .executeTransaction(to, value, data, operation, proofs)
+      .executeTransaction(to, value, data, operation, proofsTuple)
       .encodeABI()
-    await sdk.txs.send({
-      txs: [
-        {
-          value: '0',
-          to: samAddress,
-          data: executeTxData,
-        },
-      ],
-      params: txParams,
-    })
+
+    // await sdk.txs.send({
+    //   txs: [
+    //     {
+    //       value: '0',
+    //       to: samAddress,
+    //       data: executeTxData,
+    //     },
+    //   ],
+    //   params: txParams,
+    // })
+
+    let externalWeb3 = new Web3(Web3.givenProvider)
+
+    const fromAccount = safe.owners[0]
+    const toAddress = samAddress
+    const amountToSend = '0'
+
+    // Build the transaction object
+    const transactionObject = {
+      from: fromAccount,
+      to: toAddress,
+      value: amountToSend,
+      data: executeTxData,
+    }
+
+    // externalWeb3.eth.sendTransaction(transactionObject)
+    //   .on('transactionHash', (hash) => {
+    //     console.log('Transaction Hash:', hash);
+    //   })
+    //   .on('receipt', (receipt) => {
+    //     console.log('Transaction Receipt:', receipt);
+    //   })
+    //   .on('error', (error) => {
+    //     console.error('Transaction Error:', error);
+    //   })
+    //   .then(console.log)
   }
 
   return (

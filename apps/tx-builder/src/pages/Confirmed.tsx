@@ -35,7 +35,7 @@ export default Confirmed
 const Wrapper = styled.main`
   && {
     padding: 120px 48px 48px;
-    max-width: 650px;
+    max-width: 750px;
     margin: 0 auto;
   }
 `
