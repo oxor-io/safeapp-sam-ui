@@ -20,9 +20,8 @@ import DeleteTransactionModal from './modals/DeleteTransactionModal'
 import DeleteBatchModal from './modals/DeleteBatchModal'
 import SaveBatchModal from './modals/SaveBatchModal'
 import EditTransactionModal from './modals/EditTransactionModal'
-import { useNetwork, useTransactionLibrary } from '../store'
+import { useNetwork } from '../store'
 import Item from './TransactionBatchListItem'
-import VirtualizedList from './VirtualizedList'
 import { getTransactionText } from '../utils'
 import { EditableLabelProps } from './EditableLabel'
 import { ZkWallet } from '../hooks/useZkWallet'
@@ -46,7 +45,6 @@ type TransactionsBatchListProps = {
   removeAllTransactions?: () => void
   replaceTransaction?: (newTransaction: ProposedTransaction, index: number) => void
   reorderTransactions?: (sourceIndex: number, destinationIndex: number) => void
-  onTransactionConfirm?: (id: number) => void
 }
 
 const TRANSACTION_LIST_DROPPABLE_ID = 'Transaction_List'
@@ -61,7 +59,6 @@ const TransactionsBatchList = ({
   saveBatch,
   showTransactionDetails,
   batchTitle,
-  onTransactionConfirm,
   zkWallet,
 }: TransactionsBatchListProps) => {
   const [draggableTxIndexOrigin, setDraggableTxIndexOrigin] = useState<number>()
@@ -139,72 +136,6 @@ const TransactionsBatchList = ({
   return (
     <>
       <TransactionsBatchWrapper>
-        {/* Transactions Batch Header */}
-        {/*{showBatchHeader && (*/}
-        {/*  <TransactionHeader>*/}
-            {/* Transactions Batch Counter */}
-            {/*<TransactionCounterDot color="tag">*/}
-            {/*  <Text size="xl" color="white">*/}
-            {/*    {transactions.length}*/}
-            {/*  </Text>*/}
-            {/*</TransactionCounterDot>*/}
-
-            {/*/!* Transactions Batch Title *!/*/}
-            {/*{batchTitle && (*/}
-            {/*  <TransactionsTitle withoutMargin size="lg">*/}
-            {/*    {batchTitle}*/}
-            {/*  </TransactionsTitle>*/}
-            {/*)}*/}
-
-            {/* Transactions Batch Actions */}
-            {/*{saveBatch && (*/}
-            {/*  <Tooltip*/}
-            {/*    placement="top"*/}
-            {/*    title="Save to Library"*/}
-            {/*    backgroundColor="primary"*/}
-            {/*    textColor="white"*/}
-            {/*    arrow*/}
-            {/*  >*/}
-            {/*    <StyledHeaderIconButton onClick={openSaveBatchModal}>*/}
-            {/*      <Icon*/}
-            {/*        size="sm"*/}
-            {/*        type={batch ? 'bookmarkFilled' : 'bookmark'}*/}
-            {/*        color="primary"*/}
-            {/*        aria-label="Save to Library"*/}
-            {/*      />*/}
-            {/*    </StyledHeaderIconButton>*/}
-            {/*  </Tooltip>*/}
-            {/*)}*/}
-            {/*{downloadBatch && (*/}
-            {/*  <Tooltip*/}
-            {/*    placement="top"*/}
-            {/*    title="Download"*/}
-            {/*    backgroundColor="primary"*/}
-            {/*    textColor="white"*/}
-            {/*    arrow*/}
-            {/*  >*/}
-            {/*    <StyledHeaderIconButton onClick={() => downloadBatch(fileName, transactions)}>*/}
-            {/*      <Icon size="sm" type="importImg" color="primary" aria-label="Download" />*/}
-            {/*    </StyledHeaderIconButton>*/}
-            {/*  </Tooltip>*/}
-            {/*)}*/}
-
-            {/*{removeAllTransactions && (*/}
-            {/*  <Tooltip*/}
-            {/*    placement="top"*/}
-            {/*    title="Clear transactions"*/}
-            {/*    backgroundColor="primary"*/}
-            {/*    textColor="white"*/}
-            {/*    arrow*/}
-            {/*  >*/}
-            {/*    <StyledHeaderIconButton onClick={openClearTransactions}>*/}
-            {/*      <Icon size="sm" type="delete" color="error" aria-label="Clear transactions" />*/}
-            {/*    </StyledHeaderIconButton>*/}
-            {/*  </Tooltip>*/}
-            {/*)}*/}
-          {/*</TransactionHeader>*/}
-        {/*)}*/}
-
         {/* Standard Transactions List */}
           <DragDropContext
             onDragStart={onDragStart}
@@ -241,7 +172,6 @@ const TransactionsBatchList = ({
                           removeTransaction={removeTransaction}
                           setTxIndexToRemove={setTxIndexToRemove}
                           openDeleteTxModal={openDeleteTxModal}
-                          onTransactionConfirm={onTransactionConfirm}
                         />
                       )}
                     </Draggable>

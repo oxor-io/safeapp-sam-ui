@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, useState, useEffect } from 'react'
 import { Button, Text, Title } from '@gnosis.pm/safe-react-components'
 import styled from 'styled-components'
 
@@ -21,6 +21,10 @@ const ModuleConfiguration: FC = () => {
   const { safe} = useNetwork()
 
   const [localListOfOwners, setLocalListOfOwners] = useState<string>(listOfOwners.join(', '))
+
+  useEffect(() => {
+    setLocalListOfOwners(listOfOwners.join(', '))
+  }, [listOfOwners])
 
   const onModuleCreate = async () => {
     const testSalt = soliditySha3({

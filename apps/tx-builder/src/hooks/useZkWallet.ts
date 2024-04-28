@@ -7,12 +7,13 @@ const REACT_APP_SUPABASE_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJz
 
 export interface ZkWallet {
   id: number
+  safeWallet: string
   owners: string[]
   root: string
   address: string
 }
 
-type ZkWalletParams = 'id' | 'root' | 'owners' | 'address'
+type ZkWalletParams = 'id' | 'root' | 'safeWallet' | 'owners' | 'address'
 export const useZkWallet = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [zkWallets, setZkWallets] = useState<ZkWallet[]>([])
@@ -66,8 +67,8 @@ export const useZkWallet = () => {
     })
   }
 
-  const removeZkWallet = async (transaction: Pick<ProposedTransaction, 'id'>) => {
-    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/zkWallets?id=eq.${transaction.id}`, {
+  const removeZkWallet = async (address: string) => {
+    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/zkWallets?id=eq.${address}`, {
       method: 'DELETE',
       headers: {
         "Content-Type": 'application/json',
@@ -76,7 +77,6 @@ export const useZkWallet = () => {
       },
     })
   }
-
 
   const fetchZkWalletByParam = async (param: ZkWalletParams, value: string) => {
     return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/zkWallets?${param}=eq.${value}&select=*`, {

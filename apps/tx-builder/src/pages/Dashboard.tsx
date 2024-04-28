@@ -172,7 +172,7 @@ const Dashboard = (): ReactElement => {
       proofs: [zkProof],
       confirmed: false,
       operation: 0,
-      threshold,
+      threshold: threshold!,
     })
 
     navigate(REVIEW_AND_CONFIRM_PATH)

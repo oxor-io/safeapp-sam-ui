@@ -8,11 +8,10 @@ import {
   Text,
   TextFieldInput,
 } from '@gnosis.pm/safe-react-components'
-import { AccordionDetails, IconButton } from '@material-ui/core'
+import { AccordionDetails } from '@material-ui/core'
 import { memo, useState } from 'react'
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd'
 import styled from 'styled-components'
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator'
 import { ProposedTransaction, SamTransaction } from '../typings/models'
 import TransactionDetails from './TransactionDetails'
 import { getTransactionText } from '../utils'
@@ -45,7 +44,6 @@ type TransactionProps = {
   removeTransaction?: (index: number) => void
   setTxIndexToRemove: (index: string) => void
   openDeleteTxModal: () => void
-  onTransactionConfirm?: (id: number) => void
 }
 
 const TransactionBatchListItem = memo(
@@ -61,7 +59,6 @@ const TransactionBatchListItem = memo(
     draggableTxIndexOrigin,
     reorderTransactions,
     networkPrefix,
-    onTransactionConfirm,
   }: TransactionProps) => {
     const { description } = transaction
     const { to } = description
@@ -95,8 +92,26 @@ const TransactionBatchListItem = memo(
     const { updateTransactionById } = useTransaction()
     const { executeTransaction } = useSam()
 
+    const onConfirm = async () => {
+      if (!!zkProof) {
+        await updateTransactionById(
+          transaction.id,
+          {
+            proofs: [
+              ...transaction.proofs,
+              zkProof,
+            ]
+          }
+        )
+
+        return
+      }
+
+      setIsConfirming(!isConfirming)
+      setTxExpanded(true)
+    }
+
     const onGenerateProof = async () => {
-      console.log('zkWallet', zkWallet)
       if (!zkWallet) {
         return
       }
@@ -126,6 +141,11 @@ const TransactionBatchListItem = memo(
           proofs,
         }
       )
+
+      // TODO: dont forget to enable
+      await updateTransactionById(transaction.id, {
+        confirmed: true
+      })
     }
 
     return (
@@ -204,38 +224,20 @@ const TransactionBatchListItem = memo(
 
               {!transaction.confirmed && (
                 <>
-                  { onTransactionConfirm && (
-                    <Button
-                      style={{ fontSize: '12px', padding: '0 10px', width: '80px', marginRight: '10px', minWidth: 'initial' }}
-                      size="md"
-                      variant="bordered"
-                      color="primary"
-                      disabled={isLoading}
-                      onClick={async (event: any) => {
-                        event.stopPropagation()
+                  <Button
+                    style={{ fontSize: '12px', padding: '0 10px', width: '80px', marginRight: '10px', minWidth: 'initial' }}
+                    size="md"
+                    variant="bordered"
+                    color="primary"
+                    disabled={isLoading}
+                    onClick={async (event: any) => {
+                      event.stopPropagation()
 
-                        if (!!zkProof) {
-                          await updateTransactionById(
-                            transaction.id,
-                            {
-                              proofs: [
-                                ...transaction.proofs,
-                                zkProof,
-                              ]
-                            }
-                          )
-
-                          return
-                        }
-
-                        setIsConfirming(!isConfirming)
-                        setTxExpanded(true)
-                        onTransactionConfirm(transaction.id)
-                      }}
-                    >
-                      Confirm
-                    </Button>
-                  )}
+                      await onConfirm()
+                    }}
+                  >
+                    Confirm
+                  </Button>
 
                   {!isConfirming && (
                     <Button
@@ -393,12 +395,6 @@ const StyledAccordion = styled(Accordion).withConfig({
   }
 `
 
-const TransactionActionButton = styled(IconButton)`
-  height: 32px;
-  width: 32px;
-  padding: 0;
-`
-
 const TransactionsDescription = styled(Text)`
   flex-grow: 1;
   padding-left: 24px;
@@ -406,11 +402,6 @@ const TransactionsDescription = styled(Text)`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-`
-
-const DragAndDropIndicatorIcon = styled(DragIndicatorIcon)`
-  color: #b2bbc0;
-  margin-right: 4px;
 `
 
 export default TransactionBatchListItem

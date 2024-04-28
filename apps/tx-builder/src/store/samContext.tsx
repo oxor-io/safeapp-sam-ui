@@ -1,5 +1,5 @@
 import { FC, createContext, useContext, useEffect, useState } from 'react'
-import { AbiItem, utf8ToHex, toBN, numberToHex, toHex } from 'web3-utils'
+import { AbiItem, utf8ToHex, toBN, numberToHex } from 'web3-utils'
 import { Contract } from 'web3-eth-contract'
 
 import { useNetwork } from './networkContext'
@@ -15,7 +15,7 @@ import { BigNumber } from 'bignumber.js'
 type SamContextProps = {
   zkWalletAddress: string | null
   listOfOwners: string[]
-  threshold: number
+  threshold: number | null
   root: string
   moduleEnabled: boolean
   createModule: (root: string, salt: string, listOfOwners: string, initThreshold: number, ownersArr: string[]) => Promise<void>
@@ -49,12 +49,30 @@ const SamProvider: FC = ({ children }) => {
   const [listOfOwners, setListOfOwners] = useState<string[]>([])
   const [zkWalletAddress, setZkWalletAddress] = useState<string | null>(null)
   const [root, setRoot] = useState<string>('')
-  const [threshold, setThreshold] = useState<number>(1)
+  const [threshold, setThreshold] = useState<number | null>(null)
   const [moduleEnabled, setModuleEnabled] = useState<boolean>(false)
 
   const { sdk, web3, safe } = useNetwork()
 
-  const { saveZkWallet } = useZkWallet()
+  const { saveZkWallet, get, removeZkWallet } = useZkWallet()
+
+  useEffect(() => {
+    get.byParam('safeWallet', safe.safeAddress)
+      .then((res) => res.json())
+      .then((walletArr) => {
+        if (walletArr.length === 0) {
+          return
+        }
+
+        const accountModule = walletArr[0]
+
+        setZkWalletAddress(accountModule.address)
+        setListOfOwners(accountModule.owners)
+        setRoot(accountModule.root)
+        setThreshold(accountModule.owners.length)
+        setModuleEnabled(true)
+      })
+  }, [])
 
   useEffect(() => {
     if (!web3) {
@@ -116,6 +134,7 @@ const SamProvider: FC = ({ children }) => {
       owners: ownersArr,
       root,
       address: createdZkWalletAddress,
+      safeWallet: safe.safeAddress,
     })
   }
 
@@ -172,7 +191,13 @@ const SamProvider: FC = ({ children }) => {
       params: txParams,
     })
 
+    await removeZkWallet(zkWalletAddress!)
+
     setModuleEnabled(false)
+    setZkWalletAddress('')
+    setRoot('')
+    setThreshold(null)
+    setListOfOwners([])
   }
 
   const fileSam = async (newRoot: string, newThreshold: number, newListOfOwners: string[]) => {
