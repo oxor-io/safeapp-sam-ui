@@ -8,6 +8,7 @@ export interface SamTransaction extends ProposedTransaction {
   confirmed: boolean
   address: string
   threshold: number
+  owners: string[]
 }
 
 export interface ProposedTransaction {

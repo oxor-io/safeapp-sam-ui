@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import {
   Title,
   Loader,
@@ -8,46 +8,35 @@ import styled from 'styled-components'
 import TransactionsBatchList from '../components/TransactionsBatchList'
 import { useNetwork } from '../store'
 import { useTransaction } from '../hooks/useTransaction'
-import { useZkWallet, ZkWallet } from '../hooks/useZkWallet'
+import { useZkWallet } from '../hooks/useZkWallet'
 
 const ReviewAndConfirm = () => {
   const { safe } = useNetwork()
   const { zkWallets} = useZkWallet()
-  const { isLoading, transactions, get} = useTransaction()
-
-  const [zkWallet, setZkWallet] = useState<ZkWallet | undefined>(undefined)
+  const { transactions, isLoading, get} = useTransaction()
 
   useEffect(() => {
     if (!zkWallets.length) {
       return
     }
 
-    const owner = safe.owners[0]
-
-    const zkWallet = zkWallets.find((wallet) => {
-      return wallet.owners.includes(owner)
-    })
-    setZkWallet(zkWallet)
-
-    if (!zkWallet) {
-      return
-    }
-
-    get.byParam('address', zkWallet.address).then()
+    get.all()
   }, [zkWallets, safe.owners])
+
+  const pendingTransactions = transactions
+    .filter((tx) => !tx.confirmed && tx.owners.includes(safe.owners[0]))
 
   return (
     <Wrapper>
       <StyledTitle size="xl">Review and Confirm</StyledTitle>
 
       { !isLoading ?
-        transactions.length > 0 && (
+        pendingTransactions.length > 0 && (
           <TransactionsBatchList
             batchTitle={'Transactions Batch'}
-            transactions={transactions}
+            transactions={pendingTransactions}
             showTransactionDetails
             showBatchHeader
-            zkWallet={zkWallet}
           />
         ) : (
           <Loader size="lg" color="secondary" />

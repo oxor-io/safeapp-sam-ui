@@ -24,13 +24,11 @@ import { useNetwork } from '../store'
 import Item from './TransactionBatchListItem'
 import { getTransactionText } from '../utils'
 import { EditableLabelProps } from './EditableLabel'
-import { ZkWallet } from '../hooks/useZkWallet'
 
 type TransactionsBatchListProps = {
   transactions: SamTransaction[]
   showTransactionDetails: boolean
   showBatchHeader: boolean
-  zkWallet?: ZkWallet
   // batch title has multiple types because there are files passing it as a string
   // or 2 types of components:
   // 1: apps/tx-builder/src/pages/EditTransactionLibrary.tsx
@@ -59,7 +57,6 @@ const TransactionsBatchList = ({
   saveBatch,
   showTransactionDetails,
   batchTitle,
-  zkWallet,
 }: TransactionsBatchListProps) => {
   const [draggableTxIndexOrigin, setDraggableTxIndexOrigin] = useState<number>()
   const [draggableTxIndexDestination, setDraggableTxIndexDestination] = useState<number>()
@@ -155,7 +152,6 @@ const TransactionsBatchList = ({
                       {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                         <Item
                           key={transaction.id}
-                          zkWallet={zkWallet}
                           transaction={transaction}
                           provided={provided}
                           snapshot={snapshot}

@@ -286,7 +286,7 @@ const SamProvider: FC = ({ children }) => {
     const proofsTuple = proofs.map((proof) => {
       return [
         proof.pi_a.slice(0, 2).map((item) => bnStringToHexUint256(item)),
-        proof.pi_b.slice(0, 2).map((item) => item.map((value) => bnStringToHexUint256(value))),
+        proof.pi_b.slice(0, 2).map((item) => item.reverse().map((value) => bnStringToHexUint256(value))),
         proof.pi_c.slice(0, 2).map((item) => bnStringToHexUint256(item)),
         bnStringToHexUint256(proof.commit),
       ]
@@ -296,17 +296,6 @@ const SamProvider: FC = ({ children }) => {
       .methods
       .executeTransaction(to, value, data, operation, proofsTuple)
       .encodeABI()
-
-    // await sdk.txs.send({
-    //   txs: [
-    //     {
-    //       value: '0',
-    //       to: samAddress,
-    //       data: executeTxData,
-    //     },
-    //   ],
-    //   params: txParams,
-    // })
 
     let externalWeb3 = new Web3(Web3.givenProvider)
 

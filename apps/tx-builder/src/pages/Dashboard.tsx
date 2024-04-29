@@ -173,6 +173,7 @@ const Dashboard = (): ReactElement => {
       confirmed: false,
       operation: 0,
       threshold: threshold!,
+      owners: listOfOwners,
     })
 
     navigate(REVIEW_AND_CONFIRM_PATH)
