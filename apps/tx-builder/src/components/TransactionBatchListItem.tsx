@@ -10,6 +10,7 @@ import {
 } from '@gnosis.pm/safe-react-components'
 import { AccordionDetails } from '@material-ui/core'
 import { memo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd'
 import styled from 'styled-components'
 import { ProposedTransaction, SamTransaction } from '../typings/models'
@@ -20,8 +21,8 @@ import { useGenerateCircuitInputs } from '../hooks/useGenerateCircuitInputs'
 import { bigintToUint8ArrayBitwise } from '../scripts/common'
 import { addHexPrefix } from "ethereumjs-util"
 import { useTransaction } from '../hooks/useTransaction'
-import { ZkWallet } from '../hooks/useZkWallet'
 import { useSam } from '../store/samContext'
+import { CONFIRMED_PATH } from '../routes/routes'
 
 const UNKNOWN_POSITION_LABEL = '?'
 const minArrowSize = '12'
@@ -33,7 +34,6 @@ type TransactionProps = {
   isLastTransaction: boolean
   showTransactionDetails: boolean
   index: number
-  zkWallet?: ZkWallet
   draggableTxIndexDestination: number | undefined
   draggableTxIndexOrigin: number | undefined
   reorderTransactions?: (sourceIndex: number, destinationIndex: number) => void
@@ -54,7 +54,6 @@ const TransactionBatchListItem = memo(
     isLastTransaction,
     showTransactionDetails,
     index,
-    zkWallet,
     draggableTxIndexDestination,
     draggableTxIndexOrigin,
     reorderTransactions,
@@ -91,6 +90,7 @@ const TransactionBatchListItem = memo(
     const { generateInputs } = useGenerateCircuitInputs()
     const { updateTransactionById } = useTransaction()
     const { executeTransaction } = useSam()
+    const navigate = useNavigate()
 
     const onConfirm = async () => {
       if (!!zkProof) {
@@ -112,15 +112,11 @@ const TransactionBatchListItem = memo(
     }
 
     const onGenerateProof = async () => {
-      if (!zkWallet) {
-        return
-      }
-
       const privateKeyHex = addHexPrefix(privateKey)
       const privateKeyUint8Array = bigintToUint8ArrayBitwise(BigInt(privateKeyHex))
 
       const witness = await generateInputs({
-        participantAddresses: zkWallet.owners,
+        participantAddresses: transaction.owners,
         privKey: privateKeyUint8Array,
         msgHash: transaction.msgHash,
       })
@@ -142,10 +138,11 @@ const TransactionBatchListItem = memo(
         }
       )
 
-      // TODO: dont forget to enable
       // await updateTransactionById(transaction.id, {
       //   confirmed: true
       // })
+
+      navigate(CONFIRMED_PATH)
     }
 
     return (
@@ -229,7 +226,7 @@ const TransactionBatchListItem = memo(
                     size="md"
                     variant="bordered"
                     color="primary"
-                    disabled={isLoading}
+                    disabled={isLoading || transaction.proofs.length === transaction.threshold}
                     onClick={async (event: any) => {
                       event.stopPropagation()
 
