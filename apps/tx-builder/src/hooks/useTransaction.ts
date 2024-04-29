@@ -2,8 +2,8 @@ import { useState } from 'react'
 
 import { SamTransaction } from '../typings/models'
 
-const REACT_APP_SUPABASE_URL = "https://snsoupmxxcbdyohaeeny.supabase.co"
-const REACT_APP_SUPABASE_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuc291cG14eGNiZHlvaGFlZW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTM4OTM2MzEsImV4cCI6MjAyOTQ2OTYzMX0.v8BGP1LFm1siAYXC7QYobH9bJ0y-tnzVMCqJkhOF4Eg"
+const REACT_APP_SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL ?? ""
+const REACT_APP_SUPABASE_KEY= process.env.REACT_APP_SUPABASE_KEY ?? ""
 
 type TransactionParams = keyof SamTransaction
 
