@@ -60,7 +60,10 @@ const ModuleConfiguration: FC = () => {
   }
 
   const getArrayFromOwners = (): string[] => {
-    return localListOfOwners.split(',').map((element) => element.trim())
+    return localListOfOwners
+      .split(',')
+      .map((item) => item.trim())
+      .filter((item) => item !== '')
   }
 
   return (
