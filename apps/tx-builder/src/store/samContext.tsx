@@ -1,4 +1,5 @@
 import { FC, createContext, useContext, useEffect, useState } from 'react'
+import Web3 from 'web3'
 import { AbiItem, utf8ToHex, toBN, numberToHex, padLeft } from 'web3-utils'
 import { Contract } from 'web3-eth-contract'
 
@@ -9,9 +10,10 @@ import safeModule from '../contracts/Safe.json'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 import { useZkWallet } from '../hooks/useZkWallet'
 import { CircomProof } from '../hooks/useCircomProof'
-import Web3 from 'web3'
+import { useTransaction } from '../hooks/useTransaction'
 
 type SamContextProps = {
+  errorMessage: string
   zkWalletAddress: string | null
   listOfOwners: string[]
   threshold: number | null
@@ -20,9 +22,10 @@ type SamContextProps = {
   createModule: (root: string, salt: string, listOfOwners: string, initThreshold: number, ownersArr: string[]) => Promise<void>
   enableModule: () => Promise<void>
   disableModule: () => Promise<void>
-  executeTransaction: (samAddress: string, executeTx: ExecuteTransaction) => Promise<void>
+  executeTransaction: (id: number, samAddress: string, executeTx: ExecuteTransaction) => Promise<void>
   fileSam: (newRoot: string, newThreshold: number, newListOfOwners: string[]) => Promise<void>
   getNonce: () => Promise<number>
+  setErrorMessage: (errorMessage: string) => void
 }
 
 interface ExecuteTransaction {
@@ -50,9 +53,11 @@ const SamProvider: FC = ({ children }) => {
   const [root, setRoot] = useState<string>('')
   const [threshold, setThreshold] = useState<number | null>(null)
   const [moduleEnabled, setModuleEnabled] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>("")
 
   const { sdk, web3, safe } = useNetwork()
 
+  const { updateTransactionById } = useTransaction()
   const { saveZkWallet, get, removeZkWallet, updateZkWallet } = useZkWallet()
 
   useEffect(() => {
@@ -258,14 +263,17 @@ const SamProvider: FC = ({ children }) => {
   }
 
   const executeTransaction = async (
+    id: number,
     samAddress: string,
     executeTx: ExecuteTransaction
   ) => {
-    if (!web3) {
+    if (!Web3.givenProvider) {
       return
     }
 
-    const samTxContract = new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], samAddress)
+    let externalWeb3 = new Web3(Web3.givenProvider)
+
+    const samTxContract = new externalWeb3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], samAddress)
 
     const {
       to,
@@ -297,8 +305,6 @@ const SamProvider: FC = ({ children }) => {
       .executeTransaction(to, value, data, operation, proofsTuple)
       .encodeABI()
 
-    let externalWeb3 = new Web3(Web3.givenProvider)
-
     // Build the transaction object
     const transactionObject = {
       from: safe.owners[0],
@@ -307,18 +313,17 @@ const SamProvider: FC = ({ children }) => {
       data: executeTxData,
     }
 
-    externalWeb3.eth.sendTransaction(transactionObject)
-      .on('transactionHash', (hash) => {
-        console.log('Transaction Hash:', hash);
-      })
+    await externalWeb3.eth.sendTransaction(transactionObject)
       .on('receipt', (receipt) => {
-        console.log('Transaction Receipt:', receipt);
+        if (receipt.status) {
+          updateTransactionById(id, {
+            confirmed: true
+          })
+        }
       })
       .on('error', (error) => {
-        console.error('Transaction Error:', error);
-        throw new Error(error.message)
-      })
-      .catch((error) => {
+        setErrorMessage(`Transaction Error:  ${error.message}`)
+        console.error('Transaction Error:', error)
         throw new Error(error.message)
       })
   }
@@ -326,6 +331,7 @@ const SamProvider: FC = ({ children }) => {
   return (
     <SamContext.Provider
       value={{
+        errorMessage,
         zkWalletAddress,
         listOfOwners,
         root,
@@ -337,6 +343,7 @@ const SamProvider: FC = ({ children }) => {
         executeTransaction,
         fileSam,
         getNonce,
+        setErrorMessage,
       }}
     >
       { children }
