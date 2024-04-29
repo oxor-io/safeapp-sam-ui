@@ -237,11 +237,11 @@ const SamProvider: FC = ({ children }) => {
           to: zkWalletAddress,
           data: changeRoot,
         },
-        {
+        ...newThreshold !== threshold ? [{
           value: '0',
           to: zkWalletAddress,
           data: changeThreshold,
-        },
+        }] : [],
       ],
       params: txParams,
     })

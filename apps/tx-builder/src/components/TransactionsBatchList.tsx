@@ -43,6 +43,7 @@ type TransactionsBatchListProps = {
   removeAllTransactions?: () => void
   replaceTransaction?: (newTransaction: ProposedTransaction, index: number) => void
   reorderTransactions?: (sourceIndex: number, destinationIndex: number) => void
+  onConfirmation?: () => void
 }
 
 const TRANSACTION_LIST_DROPPABLE_ID = 'Transaction_List'
@@ -57,6 +58,7 @@ const TransactionsBatchList = ({
   saveBatch,
   showTransactionDetails,
   batchTitle,
+  onConfirmation,
 }: TransactionsBatchListProps) => {
   const [draggableTxIndexOrigin, setDraggableTxIndexOrigin] = useState<number>()
   const [draggableTxIndexDestination, setDraggableTxIndexDestination] = useState<number>()
@@ -168,6 +170,7 @@ const TransactionsBatchList = ({
                           removeTransaction={removeTransaction}
                           setTxIndexToRemove={setTxIndexToRemove}
                           openDeleteTxModal={openDeleteTxModal}
+                          onConfirmation={onConfirmation}
                         />
                       )}
                     </Draggable>

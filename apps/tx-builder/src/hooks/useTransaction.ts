@@ -8,7 +8,7 @@ const REACT_APP_SUPABASE_KEY= process.env.REACT_APP_SUPABASE_KEY ?? ""
 type TransactionParams = keyof SamTransaction
 
 export const useTransaction = () => {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [transactions, setTransactions] = useState<SamTransaction[]>([])
 
   const fetchTransactionsByParam = async (param: TransactionParams, value: string) => {

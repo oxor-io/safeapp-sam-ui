@@ -45,6 +45,7 @@ type TransactionProps = {
   removeTransaction?: (index: number) => void
   setTxIndexToRemove: (index: string) => void
   openDeleteTxModal: () => void
+  onConfirmation?: () => void
 }
 
 const TransactionBatchListItem = memo(
@@ -59,6 +60,7 @@ const TransactionBatchListItem = memo(
     draggableTxIndexOrigin,
     reorderTransactions,
     networkPrefix,
+    onConfirmation,
   }: TransactionProps) => {
     const { description } = transaction
     const { to } = description
@@ -106,6 +108,7 @@ const TransactionBatchListItem = memo(
         )
 
         setIsConfirming(false)
+        onConfirmation && onConfirmation()
 
         return
       }
@@ -262,6 +265,7 @@ const TransactionBatchListItem = memo(
                     <IconButton
                       style={{ marginLeft: '10px' }}
                       size="medium"
+                      disabled={isLoading}
                       onClick={() => setIsConfirming(false)}
                     >
                       <Close />

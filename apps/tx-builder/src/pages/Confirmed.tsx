@@ -14,10 +14,10 @@ const Confirmed = () => {
   const { safe } = useNetwork()
 
   useEffect(() => {
-    get.all().then()
+    setTimeout(() => get.all(), 2200)
   }, [])
 
-  const confirmedTransactions = transactions.filter((tx) => tx.confirmed && tx.owners.includes(safe.owners[0]))
+  const confirmedTransactions = transactions.filter((tx) => tx.confirmed && tx.owners.some((owner) => safe.owners.includes(owner)))
 
   return (
     <Wrapper>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Title,
   Loader,
@@ -15,16 +15,19 @@ const ReviewAndConfirm = () => {
   const { zkWallets} = useZkWallet()
   const { transactions, isLoading, get} = useTransaction()
 
+  // Quick hack to refetch page on request
+  const [counter, setCounter] = useState(0)
+
   useEffect(() => {
     if (!zkWallets.length) {
       return
     }
 
     get.all()
-  }, [zkWallets, safe.owners])
+  }, [zkWallets, safe.owners, counter])
 
   const pendingTransactions = transactions
-    .filter((tx) => !tx.confirmed && tx.owners.includes(safe.owners[0]))
+    .filter((tx) => !tx.confirmed && tx.owners.some((owner) => safe.owners.includes(owner)))
 
   return (
     <Wrapper>
@@ -37,6 +40,7 @@ const ReviewAndConfirm = () => {
             transactions={pendingTransactions}
             showTransactionDetails
             showBatchHeader
+            onConfirmation={() => setCounter((v) => ++v)}
           />
         ) : (
           <Loader size="lg" color="secondary" />
