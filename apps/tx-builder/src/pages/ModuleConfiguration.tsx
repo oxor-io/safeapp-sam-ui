@@ -119,7 +119,6 @@ const ModuleConfiguration: FC = () => {
               <Button
                 onClick={onModuleDisable}
                 size="md"
-                disabled
                 color="error"
                 variant="bordered"
               >

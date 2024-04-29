@@ -14,7 +14,7 @@ export const useTransaction = () => {
   const fetchTransactionsByParam = async (param: TransactionParams, value: string) => {
     setIsLoading(true)
     try {
-      const response = await fetch(`${ REACT_APP_SUPABASE_URL }/rest/v1/transactions?${ param }=eq.${ value }&select=*`, {
+      const response = await fetch(`${REACT_APP_SUPABASE_URL }/rest/v1/transactions?${ param }=eq.${ value }&select=*`, {
         method: 'GET',
         headers: {
           "Content-Type": 'application/json',
@@ -76,8 +76,8 @@ export const useTransaction = () => {
     })
   }
 
-  const removeTransaction = async (transaction: Pick<SamTransaction, 'id'>) => {
-    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions?id=eq.${transaction.id}`, {
+  const removeTransactionsOnRootChange = async (samAddress: string) => {
+    return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions?address=eq.${samAddress}&confirmed=eq.false`, {
       method: 'DELETE',
       headers: {
         "Content-Type": 'application/json',
@@ -93,6 +93,6 @@ export const useTransaction = () => {
     get: {all: fetchTransactions, byParam: fetchTransactionsByParam},
     saveTransaction,
     updateTransactionById,
-    removeTransaction
+    removeTransactionsOnRootChange,
   }
 }

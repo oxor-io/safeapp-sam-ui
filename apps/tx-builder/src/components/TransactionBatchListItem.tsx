@@ -105,6 +105,8 @@ const TransactionBatchListItem = memo(
           }
         )
 
+        setIsConfirming(false)
+
         return
       }
 
@@ -142,6 +144,8 @@ const TransactionBatchListItem = memo(
 
       navigate(CONFIRMED_PATH)
     }
+
+    const confirmButtonDisabled = isLoading || transaction.proofs.length === transaction.threshold || (isConfirming && !zkProof)
 
     return (
       <TransactionListItem ref={provided.innerRef} {...provided.draggableProps}>
@@ -183,6 +187,7 @@ const TransactionBatchListItem = memo(
                 <>
                   <TextFieldInput
                     fullWidth
+                    color="secondary"
                     size="small"
                     name="private-key"
                     label="Private key"
@@ -227,7 +232,7 @@ const TransactionBatchListItem = memo(
                     size="md"
                     variant="bordered"
                     color="primary"
-                    disabled={isLoading || transaction.proofs.length === transaction.threshold}
+                    disabled={confirmButtonDisabled}
                     onClick={async (event: any) => {
                       event.stopPropagation()
 

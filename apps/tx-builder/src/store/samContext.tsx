@@ -57,7 +57,7 @@ const SamProvider: FC = ({ children }) => {
 
   const { sdk, web3, safe } = useNetwork()
 
-  const { updateTransactionById } = useTransaction()
+  const { updateTransactionById, removeTransactionsOnRootChange } = useTransaction()
   const { saveZkWallet, get, removeZkWallet, updateZkWallet } = useZkWallet()
 
   useEffect(() => {
@@ -188,7 +188,8 @@ const SamProvider: FC = ({ children }) => {
       return
     }
 
-    const disableModuleData = safeContract.methods.disableModule(zkWalletAddress, zkWalletAddress).encodeABI()
+    const defaultPrevModuleAddress = '0x0000000000000000000000000000000000000001'
+    const disableModuleData = safeContract.methods.disableModule(defaultPrevModuleAddress, zkWalletAddress).encodeABI()
     await sdk.txs.send({
       txs: [
         {
@@ -241,11 +242,12 @@ const SamProvider: FC = ({ children }) => {
       params: txParams,
     })
 
-    // FIXME: doesnt update wallet row
     await updateZkWallet(zkWalletAddress, {
       root: newRoot,
       owners: newListOfOwners
     })
+
+    await removeTransactionsOnRootChange(zkWalletAddress)
 
     setThreshold(newThreshold)
     setRoot(newRoot)
@@ -305,9 +307,17 @@ const SamProvider: FC = ({ children }) => {
       .executeTransaction(to, value, data, operation, proofsTuple)
       .encodeABI()
 
-    // Build the transaction object
+    const accounts = await externalWeb3.eth.requestAccounts()
+
+    if (accounts.length === 0) {
+      const error = "Error requesting account"
+
+      setErrorMessage(error)
+      throw new Error(error)
+    }
+
     const transactionObject = {
-      from: safe.owners[0],
+      from: accounts[0],
       to: samAddress,
       value: '0',
       data: executeTxData,
