@@ -9,7 +9,6 @@ import {
   CONFIRMED_PATH,
 } from '../routes/routes'
 import { useSam } from '../store/samContext'
-import ChecksumWarning from './ChecksumWarning'
 import ErrorAlert from './ErrorAlert'
 
 const Header = () => {
@@ -60,7 +59,6 @@ const Header = () => {
         )}
       </HeaderWrapper>
       <ErrorAlert />
-      <ChecksumWarning />
     </>
   )
 }

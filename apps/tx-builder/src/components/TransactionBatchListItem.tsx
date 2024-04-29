@@ -8,7 +8,8 @@ import {
   Text,
   TextFieldInput,
 } from '@gnosis.pm/safe-react-components'
-import { AccordionDetails } from '@material-ui/core'
+import { AccordionDetails, IconButton } from '@material-ui/core'
+import { Close } from '@material-ui/icons'
 import { memo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd'
@@ -128,6 +129,7 @@ const TransactionBatchListItem = memo(
       const { raw: {to, value, data}, operation, proofs} = transaction
 
       await executeTransaction(
+        transaction.id,
         transaction.address,
         {
           to,
@@ -137,10 +139,6 @@ const TransactionBatchListItem = memo(
           proofs,
         }
       )
-
-      // await updateTransactionById(transaction.id, {
-      //   confirmed: true
-      // })
 
       navigate(CONFIRMED_PATH)
     }
@@ -210,7 +208,10 @@ const TransactionBatchListItem = memo(
                     size="md"
                     color="secondary"
                     disabled={isLoading}
-                    style={{ fontSize: '12px', padding: '0 10px', width: '150px', margin: '0 10px', minWidth: 'initial' }}
+                    style={{
+                      fontSize: '12px', padding: '0 10px',
+                      margin: '0 10px', minWidth: '110px',
+                    }}
                   >
                     Generate proof
                   </Button>
@@ -222,7 +223,7 @@ const TransactionBatchListItem = memo(
               {!transaction.confirmed && (
                 <>
                   <Button
-                    style={{ fontSize: '12px', padding: '0 10px', width: '80px', marginRight: '10px', minWidth: 'initial' }}
+                    style={{ fontSize: '12px', padding: '0 10px', width: '80px', minWidth: 'initial' }}
                     size="md"
                     variant="bordered"
                     color="primary"
@@ -236,9 +237,10 @@ const TransactionBatchListItem = memo(
                     Confirm
                   </Button>
 
-                  {!isConfirming && (
+
+                  {!isConfirming ? (
                     <Button
-                      style={{ fontSize: '12px', minWidth: '80px', padding: '0 10px' }}
+                      style={{ fontSize: '12px', minWidth: '80px',  marginLeft: '10px', padding: '0 10px' }}
                       size="md"
                       variant="bordered"
                       color="secondary"
@@ -250,6 +252,14 @@ const TransactionBatchListItem = memo(
                     >
                       Execute
                     </Button>
+                  ) : (
+                    <IconButton
+                      style={{ marginLeft: '10px' }}
+                      size="medium"
+                      onClick={() => setIsConfirming(false)}
+                    >
+                      <Close />
+                    </IconButton>
                   )}
                 </>
               )}
