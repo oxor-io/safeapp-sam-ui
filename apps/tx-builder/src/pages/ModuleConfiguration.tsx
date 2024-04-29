@@ -7,6 +7,7 @@ import { useSam } from '../store/samContext'
 import { soliditySha3, keccak256 } from 'web3-utils'
 import { generateTree } from '../scripts/merkleTree'
 import { useNetwork } from '../store'
+import { numberToHex } from 'web3-utils'
 
 const ModuleConfiguration: FC = () => {
   const {
@@ -18,7 +19,7 @@ const ModuleConfiguration: FC = () => {
     disableModule,
     fileSam,
   } = useSam()
-  const { safe} = useNetwork()
+  const { safe, web3} = useNetwork()
 
   const [localListOfOwners, setLocalListOfOwners] = useState<string>(listOfOwners.join(', '))
 
@@ -27,16 +28,20 @@ const ModuleConfiguration: FC = () => {
   }, [listOfOwners])
 
   const onModuleCreate = async () => {
-    const testSalt = soliditySha3({
-      type: 'uint256',
-      value: keccak256(safe.chainId.toString()),
-    }) as string
+    if (!web3) {
+      return
+    }
 
+    const blockNumber = await web3.eth.getBlockNumber()
     const owners = getArrayFromOwners()
-
     const { tree: {root} } = await generateTree(5, owners)
 
-    await createModule(root.toString(), testSalt, localListOfOwners, owners.length, owners)
+    const salt = soliditySha3({
+      type: 'uint256',
+      value: keccak256(numberToHex(root.toString()) + safe.safeAddress + blockNumber),
+    }) as string
+
+    await createModule(root.toString(), salt, localListOfOwners, owners.length, owners)
   }
 
   const onModuleEnable = async () => {
