@@ -76,7 +76,7 @@ export const useTransaction = () => {
     })
   }
 
-  const removeTransactionsOnRootChange = async (samAddress: string) => {
+  const removeTransactionsOnModuleManipulation = async (samAddress: string) => {
     return await fetch(`${REACT_APP_SUPABASE_URL}/rest/v1/transactions?address=eq.${samAddress}&confirmed=eq.false`, {
       method: 'DELETE',
       headers: {
@@ -93,6 +93,6 @@ export const useTransaction = () => {
     get: {all: fetchTransactions, byParam: fetchTransactionsByParam},
     saveTransaction,
     updateTransactionById,
-    removeTransactionsOnRootChange,
+    removeTransactionsOnModuleManipulation,
   }
 }

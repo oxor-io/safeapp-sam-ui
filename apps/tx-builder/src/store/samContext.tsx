@@ -57,7 +57,7 @@ const SamProvider: FC = ({ children }) => {
 
   const { sdk, web3, safe } = useNetwork()
 
-  const { updateTransactionById, removeTransactionsOnRootChange } = useTransaction()
+  const { updateTransactionById, removeTransactionsOnModuleManipulation } = useTransaction()
   const { saveZkWallet, get, removeZkWallet, updateZkWallet } = useZkWallet()
 
   useEffect(() => {
@@ -78,8 +78,8 @@ const SamProvider: FC = ({ children }) => {
         setListOfOwners(accountModule.owners)
         setRoot(accountModule.root)
         setThreshold(accountModule.owners.length)
-        setModuleEnabled(true)
-        setZkWalletContract(new web3!.eth.Contract(safeAnonymizationModule.abi as AbiItem[], accountModule.address))
+        setModuleEnabled(accountModule.enabled)
+        setZkWalletContract(new web3.eth.Contract(safeAnonymizationModule.abi as AbiItem[], accountModule.address))
       })
   }, [web3])
 
@@ -144,6 +144,7 @@ const SamProvider: FC = ({ children }) => {
       root,
       address: createdZkWalletAddress,
       safeWallet: safe.safeAddress,
+      enabled: false,
     })
   }
 
@@ -158,9 +159,9 @@ const SamProvider: FC = ({ children }) => {
           clearInterval(interval)
           resolve(null)
         }
-      }, 3000) // Check every 3 seconds
-    });
-  };
+      }, 2000) // Check every 2 seconds
+    })
+  }
 
   const enableModule = async () => {
     if (!safeContract || !zkWalletAddress) {
@@ -180,11 +181,13 @@ const SamProvider: FC = ({ children }) => {
       params: txParams,
     })
 
+    await updateZkWallet(zkWalletAddress, { enabled: true })
+
     setModuleEnabled(true)
   }
 
   const disableModule = async () => {
-    if (!safeContract) {
+    if (!safeContract || !zkWalletAddress) {
       return
     }
 
@@ -201,7 +204,8 @@ const SamProvider: FC = ({ children }) => {
       params: txParams,
     })
 
-    await removeZkWallet(zkWalletAddress!)
+    await removeZkWallet(zkWalletAddress)
+    await removeTransactionsOnModuleManipulation(zkWalletAddress)
 
     setModuleEnabled(false)
     setZkWalletAddress('')
@@ -247,7 +251,7 @@ const SamProvider: FC = ({ children }) => {
       owners: newListOfOwners
     })
 
-    await removeTransactionsOnRootChange(zkWalletAddress)
+    await removeTransactionsOnModuleManipulation(zkWalletAddress)
 
     setThreshold(newThreshold)
     setRoot(newRoot)

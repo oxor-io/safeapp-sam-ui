@@ -9,9 +9,10 @@ export interface ZkWallet {
   owners: string[]
   root: string
   address: string
+  enabled: boolean
 }
 
-type ZkWalletParams = 'id' | 'root' | 'safeWallet' | 'owners' | 'address'
+type ZkWalletParams = keyof ZkWallet
 export const useZkWallet = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [zkWallets, setZkWallets] = useState<ZkWallet[]>([])

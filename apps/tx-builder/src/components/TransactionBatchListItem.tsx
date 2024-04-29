@@ -191,6 +191,7 @@ const TransactionBatchListItem = memo(
                     size="small"
                     name="private-key"
                     label="Private key"
+                    autoComplete="off"
                     style={{ minHeight: 'initial', marginRight: '10px' }}
                     value={privateKey}
                     onChange={(e) => setPrivateKey(e.target.value)}

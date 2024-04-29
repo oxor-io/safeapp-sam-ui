@@ -253,6 +253,7 @@ const Dashboard = (): ReactElement => {
             value={privateKey}
             onChange={(e) => setPrivateKey(e.target.value)}
             name="private-key"
+            autoComplete="off"
             label="Private key"
           />
 
