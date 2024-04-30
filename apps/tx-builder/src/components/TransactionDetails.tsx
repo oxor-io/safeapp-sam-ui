@@ -77,6 +77,19 @@ const TransactionDetails = ({ transaction }: TransactionDetailsProp) => {
           {transaction.threshold}
         </TxValueLabel>
 
+        { transaction.txHash && (
+           <>
+             <Text size="xl" color="secondaryHover">
+               transaction hash:
+             </Text>
+             <EthHashInfo
+               hash={transaction.txHash}
+               shortenHash={15}
+               showCopyBtn
+             />
+           </>
+        )}
+
         {isContractInteractionTx && (
           <>
             {/* method */}

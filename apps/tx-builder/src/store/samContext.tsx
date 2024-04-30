@@ -311,6 +311,15 @@ const SamProvider: FC = ({ children }) => {
       .executeTransaction(to, value, data, operation, proofsTuple)
       .encodeABI()
 
+    await Web3.givenProvider.request({
+      "method": "wallet_revokePermissions",
+      "params": [
+        {
+          "eth_accounts": {}
+        }
+      ]
+    })
+
     const accounts = await externalWeb3.eth.requestAccounts()
 
     if (accounts.length === 0) {
@@ -334,6 +343,11 @@ const SamProvider: FC = ({ children }) => {
             confirmed: true
           })
         }
+      })
+      .on('transactionHash', (hash) => {
+        updateTransactionById(id , {
+          txHash: hash,
+        })
       })
       .on('error', (error) => {
         setErrorMessage(`Transaction Error:  ${error.message}`)

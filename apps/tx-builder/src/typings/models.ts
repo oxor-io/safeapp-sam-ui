@@ -9,6 +9,7 @@ export interface SamTransaction extends ProposedTransaction {
   address: string
   threshold: number
   owners: string[]
+  txHash?: string
 }
 
 export interface ProposedTransaction {
