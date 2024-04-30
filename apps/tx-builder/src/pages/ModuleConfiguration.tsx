@@ -18,6 +18,7 @@ const ModuleConfiguration: FC = () => {
     enableModule,
     disableModule,
     fileSam,
+    setErrorMessage,
   } = useSam()
   const { safe, web3} = useNetwork()
 
@@ -34,14 +35,21 @@ const ModuleConfiguration: FC = () => {
 
     const blockNumber = await web3.eth.getBlockNumber()
     const owners = getArrayFromOwners()
-    const { tree: {root} } = await generateTree(5, owners)
 
-    const salt = soliditySha3({
-      type: 'uint256',
-      value: keccak256(numberToHex(root.toString()) + safe.safeAddress + blockNumber),
-    }) as string
+    try {
+      const { tree: {root} } = await generateTree(5, owners)
 
-    await createModule(root.toString(), salt, localListOfOwners, owners.length, owners)
+      const salt = soliditySha3({
+        type: 'uint256',
+        value: keccak256(numberToHex(root.toString()) + safe.safeAddress + blockNumber),
+      }) as string
+
+      await createModule(root.toString(), salt, localListOfOwners, owners.length, owners)
+    } catch (e) {
+      if (e instanceof Error) {
+        setErrorMessage(e.message)
+      }
+    }
   }
 
   const onModuleEnable = async () => {
@@ -50,9 +58,16 @@ const ModuleConfiguration: FC = () => {
 
   const onModuleUpdate = async () => {
     const owners = getArrayFromOwners()
-    const { tree: {root} } = await generateTree(5, owners)
 
-    await fileSam(root.toString(), owners.length, owners)
+    try {
+      const { tree: {root} } = await generateTree(5, owners)
+
+      await fileSam(root.toString(), owners.length, owners)
+    } catch (e) {
+      if (e instanceof Error) {
+        setErrorMessage(e.message)
+      }
+    }
   }
 
   const onModuleDisable = async () => {

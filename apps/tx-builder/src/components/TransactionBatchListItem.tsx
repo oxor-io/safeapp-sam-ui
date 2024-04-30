@@ -92,7 +92,7 @@ const TransactionBatchListItem = memo(
     const { zkProof, isLoading, generateCircomProof } = useCircomProof()
     const { generateInputs } = useGenerateCircuitInputs()
     const { updateTransactionById } = useTransaction()
-    const { executeTransaction } = useSam()
+    const { executeTransaction, setErrorMessage } = useSam()
     const navigate = useNavigate()
 
     const onConfirm = async () => {
@@ -121,13 +121,19 @@ const TransactionBatchListItem = memo(
       const privateKeyHex = addHexPrefix(privateKey)
       const privateKeyUint8Array = bigintToUint8ArrayBitwise(BigInt(privateKeyHex))
 
-      const witness = await generateInputs({
-        participantAddresses: transaction.owners,
-        privKey: privateKeyUint8Array,
-        msgHash: transaction.msgHash,
-      })
+      try {
+        const witness = await generateInputs({
+          participantAddresses: transaction.owners,
+          privKey: privateKeyUint8Array,
+          msgHash: transaction.msgHash,
+        })
 
-      await generateCircomProof(witness)
+        await generateCircomProof(witness)
+      } catch(e) {
+        if (e instanceof Error) {
+          setErrorMessage(e.message)
+        }
+      }
     }
 
     const onExecute = async () => {

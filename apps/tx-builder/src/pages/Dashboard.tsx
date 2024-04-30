@@ -52,7 +52,7 @@ const Dashboard = (): ReactElement => {
   const { generateInputs, getMsgHash } = useGenerateCircuitInputs()
   const { zkProof, generateCircomProof, isLoading } = useCircomProof()
 
-  const { zkWalletAddress, listOfOwners, getNonce, threshold } = useSam()
+  const { zkWalletAddress, listOfOwners, getNonce, threshold, setErrorMessage } = useSam()
 
   const [msgHash, setMsgHash] = useState<string>('')
 
@@ -133,27 +133,33 @@ const Dashboard = (): ReactElement => {
 
     const nonce = await getNonce()
 
-    const msgHash = await getMsgHash(
-      to,
-      value,
-      data,
-      0,
-      nonce,
-      zkWalletAddress,
-    )
+    try {
+      const msgHash = await getMsgHash(
+        to,
+        value,
+        data,
+        0,
+        nonce,
+        zkWalletAddress,
+      )
 
-    const privateKeyHex = addHexPrefix(privateKey)
-    const privateKeyUint8Array = bigintToUint8ArrayBitwise(BigInt(privateKeyHex))
+      const privateKeyHex = addHexPrefix(privateKey)
+      const privateKeyUint8Array = bigintToUint8ArrayBitwise(BigInt(privateKeyHex))
 
-    const witness = await generateInputs({
-      participantAddresses: listOfOwners,
-      privKey: privateKeyUint8Array,
-      msgHash,
-    })
+      const witness = await generateInputs({
+        participantAddresses: listOfOwners,
+        privKey: privateKeyUint8Array,
+        msgHash,
+      })
 
-    await generateCircomProof(witness)
+      await generateCircomProof(witness)
 
-    setMsgHash(msgHash)
+      setMsgHash(msgHash)
+    } catch(e) {
+      if (e instanceof Error) {
+        setErrorMessage(e.message)
+      }
+    }
   }
 
   const onSaveTransaction = async () => {
