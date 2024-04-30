@@ -2,10 +2,10 @@ import React from 'react'
 import MuiAlert from '@material-ui/lab/Alert'
 import MuiAlertTitle from '@material-ui/lab/AlertTitle'
 import styled from 'styled-components'
-import { useTransactionLibrary } from '../store'
+import { useSam } from '../store/samContext'
 
 const ErrorAlert = () => {
-  const { errorMessage, setErrorMessage } = useTransactionLibrary()
+  const { errorMessage, setErrorMessage } = useSam()
 
   if (!errorMessage) {
     return null
