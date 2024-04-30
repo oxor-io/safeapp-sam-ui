@@ -42,3 +42,6 @@ cypress/downloads
 
 # intellij ide files
 .idea
+
+# Local Netlify folder
+.netlify

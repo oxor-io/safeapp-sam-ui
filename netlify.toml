@@ -1,0 +1,10 @@
+# example netlify.toml
+[build]
+  command = "yarn build"
+  publish = "apps/tx-builder/build"
+
+[[headers]]
+  # Define which paths this specific [[headers]] block will cover.
+  for = "/*"
+    [headers.values]
+    Access-Control-Allow-Origin = "*"
